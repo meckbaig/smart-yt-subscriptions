@@ -102,7 +102,7 @@ const loadingColor = ref([])
 
 
 onMounted(async () => {
-    connections.axiosClient.get(`Auth/GetFolder?id=${route.params.folder}&userId=${store.state.user.id}&edit=true`)
+    connections.axiosClient.get(`Folder/Get?id=${route.params.folder}&userId=${store.state.user.id}&edit=true`)
         .then(async ({ data }) => {
             folder.value = data;
             if (folder.value.subChannelsJson == "") {
@@ -127,7 +127,12 @@ onMounted(async () => {
 })
 
 function updateIconHeight() {
-    iconHeight.value = document.getElementById("submitButtons").clientHeight
+    if (document.getElementById("submitButtons")){
+        iconHeight.value = document.getElementById("submitButtons").clientHeight
+    }
+    else{
+        window.removeEventListener("resize", updateIconHeight)
+    }
 }
 
 function filteredChannels() {
@@ -159,7 +164,7 @@ function addIcon(event) {
 
 function saveChanges() {
     folder.value.channelsCount = folder.value.subChannelsJson.length;
-    connections.axiosClient.post(`Auth/UpdateFolder`, folder.value)
+    connections.axiosClient.post(`Folder/Update`, folder.value)
         .then((response) => {
             folder.value.lastChannelsUpdate = response.data.lastChannelsUpdate;
             console.log(response);

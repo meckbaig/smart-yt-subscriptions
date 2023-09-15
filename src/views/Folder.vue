@@ -50,7 +50,7 @@ const lastCall = ref([])
 onMounted(async () => {
     window.addEventListener('scroll', checkPosition);
     window.addEventListener('resize', checkPosition);
-    connections.axiosClient.get(`Auth/GetFolder?id=${route.params.folder}&userId=${store.state.user.id}`)
+    connections.axiosClient.get(`Folder/Get?id=${route.params.folder}&userId=${store.state.user.id}`)
         .then(({ data }) => {
             folder.value = data;
         })
@@ -69,7 +69,7 @@ onMounted(async () => {
 function getFolderVideos() {
     if (Date.now() - lastCall.value > 20000) {
         videos.value = [];
-        connections.axiosClient.get(`Auth/GetFolderVideos?folderId=${route.params.folder}&userId=${store.state.user.id}`)
+        connections.axiosClient.get(`Folder/GetVideos?folderId=${route.params.folder}&userId=${store.state.user.id}`)
             .then(({ data }) => {
                 videos.value = data;
                 lastCall.value = Date.now();
