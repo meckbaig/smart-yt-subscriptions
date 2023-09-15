@@ -207,7 +207,7 @@ function updateListsHeight() {
 }
 
 function toFolder(index) {
-    folder.subChannelsJson = channels.splice(index, 1).concat(this.folder.subChannelsJson)
+    folder.value.subChannelsJson = channels.value.splice(index, 1).concat(folder.value.subChannelsJson)
     //this.folder.subChannelsJson = this.folder.subChannelsJson.append(this.channels[index]);
     // if (this.folder.subChannelsJson[this.folder.subChannelsJson.length-1] == ""){
     //     this.folder.subChannelsJson.pop();
@@ -216,7 +216,7 @@ function toFolder(index) {
 
 function removeAt(index) {
     //this.channels = this.folder.subChannelsJson.splice(index, 1).concat(this.channels)
-    folder.subChannelsJson.splice(index, 1)
+    folder.value.subChannelsJson.splice(index, 1)
 }
 
 let containsSearch = (title) => title.toLowerCase().includes(search.value.toLowerCase())
