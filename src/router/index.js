@@ -4,25 +4,24 @@ import Home from '../views/Home.vue'
 import EditFolder from '../views/EditFolder.vue'
 import Folder from '../views/Folder.vue'
 
+const baseBath = process.env.NODE_ENV === 'production' ? '/smart-yt-subscriptions/' : '/'
 const routes = [
     {
-        path: process.env.NODE_ENV === 'production'
-        ? '/smart-yt-subscriptions/'
-        : '/',
+        path: baseBath,
         component: Layout,
         children: [
             {
-                path: "/",
+                path: baseBath,
                 name: "home",
                 component: Home,
             },
             {
-                path: "/folder/:folder",
+                path: baseBath+"folder/:folder",
                 name: "folder",
                 component: Folder,
             },
             {
-                path: "/folder/:folder/edit",
+                path: baseBath+"folder/:folder/edit",
                 name: "editFolder",
                 component: EditFolder,
             }
