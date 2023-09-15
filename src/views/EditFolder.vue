@@ -42,9 +42,9 @@
                 </draggable>
             </div>
             <span id="folderButtons">
-                <div class="d-flex flex-row justify-content-between gap-2 mb-2">
+                <div class="d-flex flex-row gap-2 mb-2">
                     <div class="d-flex gap-2 flex-wrap">
-                        <div class="input-group p-0">
+                        <div class="input-group p-0" style="min-width: 190px;">
                             <label class="input-group-text">Доступ</label>
                             <select v-model="folder.accessId" class="form-select pe-2">
                                 <option v-for="level in store.state.accessLevels" :value="level.id">
@@ -58,10 +58,10 @@
                             <input type="file" id="uploadIcon" accept="image/*" @change="addIcon" hidden />
                         </label>
                     </div>
-                        <img class="rounded rounded-1" title="Удалить иконку" @click="folder.icon = ''"
+                        <img class="rounded rounded-1 align-self-start" title="Удалить иконку" @click="folder.icon = ''"
                             v-bind:style="'max-height: ' + iconHeight + 'px;cursor:pointer'"
                             :src="folder.icon" />
-                    <div class="d-flex flex-column gap-2 mb-auto" id="submitButtons">
+                    <div class="d-flex flex-column ms-auto gap-2 mb-auto" id="submitButtons">
                         <button @click="saveChanges" class="btn btn-success">Сохранить</button>
                         <button @click="deleteFolder" class="btn btn-danger">Удалить</button>
                     </div>
@@ -180,18 +180,18 @@ function print() {
 }
 
 function onChange(index) {
-    for (let i = 0; i < this.folder.subChannelsJson.length; i++) {
-        if (i != index && this.folder.subChannelsJson[i].id == this.folder.subChannelsJson[index].id) {
-            this.folder.subChannelsJson.splice(index, 1);
+    for (let i = 0; i < folder.value.subChannelsJson.length; i++) {
+        if (i != index && folder.value.subChannelsJson[i].id == folder.value.subChannelsJson[index].id) {
+            folder.value.subChannelsJson.splice(index, 1);
             index = index - 1
             break;
         }
     }
     index = index + 1
-    if (this.folder.subChannelsJson.length > index) {
-        for (let i = 0; i < this.folder.subChannelsJson.length; i++) {
-            if (i != index && this.folder.subChannelsJson[i].id == this.folder.subChannelsJson[index].id) {
-                this.folder.subChannelsJson.splice(index, 1);
+    if (folder.value.subChannelsJson.length > index) {
+        for (let i = 0; i < folder.value.subChannelsJson.length; i++) {
+            if (i != index && folder.value.subChannelsJson[i].id == folder.value.subChannelsJson[index].id) {
+                folder.value.subChannelsJson.splice(index, 1);
                 break;
             }
         }
