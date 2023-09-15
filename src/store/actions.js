@@ -17,7 +17,9 @@ export function getUserData({ commit }, payload){
     connections.axiosClient.get(`Auth/GetUserData?email=${payload.email}&id=${payload.id}`)
         .then(({ data }) => {
             commit('setUserRole', data.role)
-            commit('setChannels', JSON.parse(data.subChannelsJson))
+            if (data.subChannelsJson != ""){
+                commit('setChannels', JSON.parse(data.subChannelsJson))
+            }
             commit('setLastUpdated', data.lastChannelsUpdate)
             if (data.folders != ""){
                 commit('setFolders', JSON.parse(data.folders))
