@@ -4,7 +4,7 @@ import store from './store'
 import './style.css'
 import App from './App.vue'
 import "../lib/bootstrap/css/bootstrap.min.css"
-//import "bootstrap"
+import "bootstrap"
 import vue3GoogleLogin from 'vue3-google-login'
 import cookies from 'vue-cookies'
 
