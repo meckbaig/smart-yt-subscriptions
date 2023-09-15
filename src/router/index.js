@@ -5,7 +5,7 @@ import EditFolder from '../views/EditFolder.vue'
 import Folder from '../views/Folder.vue'
 
 const basePath = process.env.NODE_ENV === 'production' ? '/smart-yt-subscriptions/' : '/'
-console.log(basePath);
+console.log("basePath: "+basePath);
 const routes = [
     {
         path: basePath,
@@ -17,12 +17,12 @@ const routes = [
                 component: Home,
             },
             {
-                path: basePath+"folder/:folder",
+                path: `${basePath}folder/:folder`,
                 name: "folder",
                 component: Folder,
             },
             {
-                path: basePath+"folder/:folder/edit",
+                path: `${basePath}folder/:folder/edit`,
                 name: "editFolder",
                 component: EditFolder,
             }
