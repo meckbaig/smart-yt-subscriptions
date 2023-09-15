@@ -6,7 +6,9 @@ import Folder from '../views/Folder.vue'
 
 const routes = [
     {
-        path: "/",
+        path: process.env.NODE_ENV === 'production'
+        ? '/smart-yt-subscriptions/'
+        : '/',
         component: Layout,
         children: [
             {
