@@ -1,7 +1,8 @@
 import axios from 'axios'
 
 export const axiosClient = axios.create({
-  baseURL: "https://localhost:44389/",
+  baseURL: "https://foldersdataapi20230916165557.azurewebsites.net/",
+  //baseURL: "https://localhost:44389/",
 });
 
 export const axiosGoogle = axios.create({
