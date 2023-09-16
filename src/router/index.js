@@ -4,7 +4,7 @@ import Home from '../views/Home.vue'
 import EditFolder from '../views/EditFolder.vue'
 import Folder from '../views/Folder.vue'
 
-const basePath = process.env.NODE_ENV === 'production' ? '/smart-yt-subscriptions/' : '/'
+const basePath = process.env.NODE_ENV === 'production' ? '/' : '/'
 const routes = [
     {
         path: basePath,
