@@ -67,7 +67,7 @@
                     </div>
                 </div>
                 <!-- <button @click="print">print</button> -->
-                <p class="mb-2 opacity-50">Последнее обновление: {{ folder.lastChannelsUpdate }}</p>
+                <p class="mb-2 opacity-50">Последнее обновление: {{ new Date(folder.lastChannelsUpdate).toLocaleString() }}</p>
             </span>
         </span>
     </div>

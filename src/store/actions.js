@@ -20,6 +20,9 @@ export function getUserData({ commit }, payload){
             if (data.subChannelsJson != ""){
                 commit('setChannels', JSON.parse(data.subChannelsJson))
             }
+            else{
+                commit('setChannels')
+            }
             commit('setLastUpdated', data.lastChannelsUpdate)
             if (data.folders != ""){
                 commit('setFolders', JSON.parse(data.folders))
@@ -52,5 +55,8 @@ export function setPublicFolders({ commit }, userId){
          if (data != ""){
             commit('setPublicFolders', data)
          }
+         else{
+            commit('setPublicFolders', [])
+        }
       })
 }

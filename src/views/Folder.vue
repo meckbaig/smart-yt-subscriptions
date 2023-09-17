@@ -11,8 +11,7 @@
             <h2 v-bind:style="contrastColor(folder.color)" class="mt-1">{{ folder.name }}</h2>
             <h5 v-if="lastCall > 0" v-bind:style="contrastColor(folder.color) + 'cursor: pointer;'"
                 class="ms-auto mt-1 text-end" title="Обновить принудительно" @click="getFolderVideos()">
-                Последнее обновление: {{ new Date(lastCall).toLocaleTimeString()
-                    + " " + new Date(lastCall).toLocaleDateString() }}</h5>
+                Последнее обновление: {{ lastCallString }}</h5>
         </div>
         <div v-if="videos.length > 0"
             class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 row-cols-xxl-6">
@@ -38,6 +37,10 @@ import { computed, onMounted, ref } from 'vue'
 let preventLoading = false;
 let page = 0;
 const videosOnPage = computed(() => store.state.videosOnPage);
+const lastCallString = computed(() => {
+    return new Date(lastCall.value).toLocaleTimeString()
+        + " " + new Date(lastCall.value).toLocaleDateString()
+})
 const visibleVideos = ref([])
 const videos = ref([])
 const folder = ref([])
@@ -69,7 +72,7 @@ onMounted(async () => {
 function getFolderVideos() {
     if (Date.now() - lastCall.value > 20000) {
         videos.value = [];
-        connections.axiosClient.get(`Folder/GetVideos?folderId=${route.params.folder}&userId=${store.state.user.id}`)
+        connections.axiosClient.get(`Folder/GetVideos?id=${route.params.folder}&userId=${store.state.user.id}`)
             .then(({ data }) => {
                 videos.value = data;
                 lastCall.value = Date.now();
