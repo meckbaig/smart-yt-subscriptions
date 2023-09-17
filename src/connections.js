@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 export const axiosClient = axios.create({
-  baseURL: "http://folderdataapi.somee.com/",
+  baseURL: "https://folderdataapi.somee.com/",
   //baseURL: "https://localhost:44389/",
 });
 
