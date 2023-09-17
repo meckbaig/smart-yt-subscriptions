@@ -4,7 +4,7 @@
          <span v-if="warning != ''" class="mx-auto mb-3">
             <h3 class="text-danger">Внимание!</h3>
             <p class="text-danger my-1">Требования для использования сервиса:</p>
-            <p class="text-danger my-1">1) На аккаунт Google должен быть зарегистрирован профиль YouTube</p>
+            <p class="text-danger my-1">1) На аккаунт Google должен быть зарегистрирован профиль(канал) YouTube</p>
             <p class="text-danger my-1">2) Подписки Вашего профиля YouTube должны быть открыты</p>
             <p class="text-danger my-1">3) Ваш профиль должен иметь хотя-бы одну подписку</p>
          </span>
