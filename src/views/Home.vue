@@ -45,8 +45,9 @@ const loadingTextPF = ref('')
 loadingTextPF.value = "Загрузка..."
 const route = useRoute()
 if (route.query.f != undefined){
+   let routeName = route.query.e ? "editFolder" : "folder";
    router.push({
-    name: "folder",
+    name: routeName,
     params: { "folder": route.query.f }
  })
 }

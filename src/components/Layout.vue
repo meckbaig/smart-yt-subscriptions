@@ -1,8 +1,12 @@
 <template>
     <header>
-        <nav class="navbar navbar-expand-md border-bottom box-shadow mb-3 fixed-top bg-body flex-nowrap" id="header">
+        <nav class="navbar navbar-expand-md border-bottom box-shadow mb-3 py-0 fixed-top bg-body flex-nowrap" id="header">
             <div class="flex-row d-flex ms-3">
-                <router-link :to="{ name: 'home' }" class="navbar-brand text-truncate">SmartYtSubscriptions</router-link>
+                <router-link :to="{ name: 'home' }" class="navbar-brand text-truncate my-0 d-flex flex-row gap-3">
+                    <img type="image/png" src="/syts-icon-new.png" class="m-0" style="height: 48px;"/>
+                    <div class="d-flex d-sm-none align-self-center">SYTS</div>
+                    <div class="d-none d-sm-flex align-self-center">SmartYtSubscriptions</div>
+                </router-link>
                 <!-- <button @click="getSubs"></button>  -->
                 <!-- <button @click="loginAsp" class="btn btn-outline-success">Залогиниться</button>
                 <button @click="getSubsAsp" class="btn btn-outline-info">Получить подписки</button> -->

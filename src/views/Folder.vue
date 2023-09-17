@@ -10,7 +10,7 @@
                 style="max-height:50px;max-width:160px">
             <h2 v-bind:style="contrastColor(folder.color)" class="mt-1">{{ folder.name }}</h2>
             <h5 v-if="lastCall > 0" v-bind:style="contrastColor(folder.color) + 'cursor: pointer;'"
-                class="ms-auto mt-1 text-end" title="Обновить принудительно" @click="getFolderVideos()">
+                class="ms-auto mt-1 text-end d-none d-md-flex" title="Обновить принудительно" @click="getFolderVideos()">
                 Последнее обновление: {{ lastCallString }}</h5>
         </div>
         <div v-if="videos.length > 0"
