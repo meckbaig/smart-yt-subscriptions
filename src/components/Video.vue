@@ -2,7 +2,7 @@
     <div v-bind:id="id" class="col align-content-center rounded mb-2">
         <div class="position-relative">
             <a :href="url" target="_blank">
-                <img class="rounded-3 w-100" style="aspect-ratio: 16/9;" :src="mediumThumbnail" loading="lazy">
+                <img class="rounded-3 w-100" style="aspect-ratio: 16/9; object-fit: cover" :src="thumbnailDpi" loading="lazy">
                 <p class="badge position-absolute bottom-0 end-0 bg-dark text-wrap opacity-75" style="margin:6px">
                     {{ simpleLendth }}</p>
             </a>
@@ -23,10 +23,12 @@
                 </li>
                 <li>
                     <div class="d-flex flex-row flex-wrap align-items-center">
-                        <a class="text-decoration-none text-nowrap text-reset p-0 m-0 fw-normal lh-1" style="font-size: 14px;">
+                        <a class="text-decoration-none text-nowrap text-reset p-0 m-0 fw-normal lh-1"
+                            style="font-size: 14px;">
                             {{ viewCountString }}</a>
                         <p class="m-0 p-0 mx-1">•</p>
-                        <a class="text-decoration-none text-nowrap text-reset p-0 m-0 fw-normal lh-1" style="font-size: 14px;">
+                        <a class="text-decoration-none text-nowrap text-reset p-0 m-0 fw-normal lh-1"
+                            style="font-size: 14px;">
                             {{ dateString }}</a>
                     </div>
 
@@ -38,8 +40,31 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { reverseTheme } from "../main";
+import store from '../store';
+window.addEventListener('resize', updateThumbnailDpi);
+
+const thumbnailDpi = ref('')
+const thumbnails = ref([])
+
+onMounted(() => {
+    thumbnails.value = store.state.ytThumbnails.slice(0, props.maxThumbnail)
+    updateThumbnailDpi()
+})
+
+function updateThumbnailDpi() {
+    let width = document.getElementById(props.id).clientWidth * window.devicePixelRatio;
+    let index = 0;
+    for (let i = 0; i < thumbnails.value.length; i++) {
+        if (width < thumbnails.value[i].width) {
+            break;
+        }
+        index = i;
+    }
+    thumbnailDpi.value = `https://i.ytimg.com/vi/${props.id}/${thumbnails.value[index].url}`
+}
+
 
 const props = defineProps({
     id: String,
@@ -50,8 +75,7 @@ const props = defineProps({
     channelId: String,
     channelTitle: String,
     channelThumbnail: String,
-    mediumThumbnail: String,
-    maxThumbnail: String
+    maxThumbnail: Number
 })
 
 const url = computed(() => {
@@ -65,7 +89,7 @@ const dateString = computed(() => {
         + " " + new Date(props.publishedAt).toLocaleDateString()
 })
 const viewCountString = computed(() => {
-    if (props.viewCount == ""){
+    if (props.viewCount == "") {
         return "Прямая трансляция"
     }
     let tmp = props.viewCount % 100;
@@ -86,6 +110,7 @@ const viewCountString = computed(() => {
     }
 
 })
+
 
 </script>
 
