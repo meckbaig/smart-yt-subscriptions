@@ -54,6 +54,10 @@ onMounted(() => {
 })
 
 function updateThumbnailDpi() {
+    if (!document.getElementById(props.id)){
+        window.removeEventListener('resize', updateThumbnailDpi);
+        return;
+    }
     let width = document.getElementById(props.id).clientWidth * window.devicePixelRatio;
     let index = 0;
     for (let i = 0; i < thumbnails.value.length; i++) {

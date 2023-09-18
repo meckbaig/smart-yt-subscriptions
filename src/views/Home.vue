@@ -1,5 +1,5 @@
 <template>
-   <div class="p-2 m-2">
+   <div class="m-0 p-0 m-sm-2 p-sm-2">
       <div v-if="store.state.user.name">
          <span v-if="warning != ''" class="mx-auto mb-3">
             <h3 @click="pMsg" class="text-danger ">Внимание!</h3>

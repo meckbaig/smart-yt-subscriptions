@@ -1,5 +1,5 @@
 <template>
-    <div class="m-2 p-2">
+    <div class="m-0 p-0 m-sm-2 p-sm-2">
         <!-- <router-link class="top-0 end-0 position-absolute mt-4 m-2 p-1 btn btn-info"
             :to="route.params.folder + '/edit'">Редактировать</router-link>
         <a class="top-0 start-0 position-absolute mt-4 m-2 p-1 btn btn-info" @click="printConsts">Печать констант</a> -->

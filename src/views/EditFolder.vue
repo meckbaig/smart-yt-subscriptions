@@ -204,10 +204,17 @@ function onChange(index) {
 }
 
 function updateListsHeight() {
-    channelsListHeight.value = window.innerHeight - document.getElementById("header").clientHeight - 70
-    if (document.getElementById("folderButtons")) {
-        folderListHeight.value = window.innerHeight - document.getElementById("header").clientHeight
-            - 70 - document.getElementById("folderButtons").clientHeight
+    if (window.innerHeight < window.innerWidth){
+        channelsListHeight.value = window.innerHeight - document.getElementById("header").clientHeight - 70
+        if (document.getElementById("folderButtons")) {
+            folderListHeight.value = window.innerHeight - document.getElementById("header").clientHeight
+                - 70 - document.getElementById("folderButtons").clientHeight
+        }
+    }
+    else{
+        channelsListHeight.value = window.innerHeight/2 - document.getElementById("header").clientHeight - 70
+        folderListHeight.value = window.innerHeight/2 - document.getElementById("header").clientHeight
+                 - document.getElementById("folderButtons").clientHeight
     }
 }
 
