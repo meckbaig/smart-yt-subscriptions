@@ -14,8 +14,8 @@ import { computed } from 'vue'
 
 const props = defineProps({
     id: String,
-    thumbnailUrl: String,
-    title: String
+    title: String,
+    thumbnailUrl: String
 })
 
 const url = computed(() => {

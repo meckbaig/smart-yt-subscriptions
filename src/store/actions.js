@@ -1,9 +1,35 @@
 import * as connections from "../connections";
+import cookies from 'vue-cookies'
 
 export function getConnectionState({ commit }) {
     connections.axiosClient.get(`Auth/GetConnectionState`)
         .then(({ data }) => {
             commit('setConnectionStates', data)
+        })
+}
+export function updateYoutubeId({ commit }, payload){
+    connections.axiosClient.post(`User/UpdateYoutubeId?id=${payload.id}&youtubeId=${payload.youtubeId}`)
+        .then(({ data }) => {
+            if (data){
+                let message = {
+                    title: "Успех",
+                    message: "Идентификатор youtube успешно обновлён",
+                    style: "alert-success"
+                }
+                commit("addMessage", message)
+                commit("setUserYoutubeId", payload.youtubeId)
+                let user_session = cookies.get('user_session')
+                user_session.youtubeId = payload.youtubeId
+                cookies.set("user_session", user_session, Infinity)
+            }
+            else {
+                let message = {
+                    title: "Ошибка",
+                    message: "Не удалось обновить идентификатор youtube",
+                    style: "alert-danger"
+                }
+                commit("addMessage", message)
+            }
         })
 }
 export function updateSubChannels({ commit }, payload) {
@@ -14,8 +40,10 @@ export function updateSubChannels({ commit }, payload) {
         });
 }
 export function getUserData({ commit }, payload){
-    connections.axiosClient.get(`User/GetData?email=${payload.email}&id=${payload.id}`)
+    connections.axiosClient.get(`User/GetData?email=${payload.email}&youtubeId=${payload.youtubeId}`)
         .then(({ data }) => {
+            commit('setUserId', data.id)
+            commit('setUserYoutubeId', data.youtubeId)
             commit('setUserRole', data.role)
             if (data.subChannelsJson != ""){
                 commit('setChannels', JSON.parse(data.subChannelsJson))

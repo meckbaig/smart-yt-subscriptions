@@ -9,9 +9,9 @@
                     // , pull: 'clone', put: false 
                 }" item-key="id" style="min-height: 200px; min-width: 200px">
                     <template #item="{ element: item, index: index }">
-                        <div v-if="containsSearch(item.snippet.title)" class="d-flex flex-row justify-content-between">
-                            <ChannelItem :title="item.snippet.title" :id="item.snippet.resourceId.channelId"
-                                :thumbnailUrl="item.snippet.thumbnails.default.url" />
+                        <div v-if="containsSearch(item.title)" class="d-flex flex-row justify-content-between">
+                            <ChannelItem :title="item.title" :id="item.channelId"
+                                :thumbnailUrl="item.thumbnailUrl" />
                             <a class="m-auto me-2 btn btn-outline-secondary p-0 border border-0" @click="toFolder(index)"
                                 style="cursor: pointer;">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor"
@@ -34,8 +34,8 @@
                     style="min-height: 200px; min-width: 200px">
                     <template #item="{ element: item, index: index }">
                         <div @mousemove="onChange(index)" class="d-flex border border-1 border-secondary-subtle rounded-2">
-                            <ChannelItem :title="item.snippet.title" :id="item.snippet.resourceId.channelId"
-                                :thumbnailUrl="item.snippet.thumbnails.default.url" />
+                            <ChannelItem :title="item.title" :id="item.channelId"
+                                :thumbnailUrl="item.thumbnailUrl" />
                             <button class="btn btn-close ms-auto p-2" @click="removeAt(index)"></button>
                         </div>
                     </template>
@@ -53,10 +53,10 @@
                         </div>
                         <input v-model="folder.color" type="color" class="h-auto flex-fill" id="colorInput"
                             style="min-height: 38px;" />
-                        <label for="uploadIcon" class="btn btn-info flex-fill" style="display: block;">
+                        <!-- <label for="uploadIcon" class="btn btn-info flex-fill" style="display: block;">
                             Добавить иконку
                             <input type="file" id="uploadIcon" accept="image/*" @change="addIcon" hidden />
-                        </label>
+                        </label> -->
                     </div>
                         <img class="rounded rounded-1 align-self-start" title="Удалить иконку" @click="folder.icon = ''"
                             v-bind:style="'max-height: ' + iconHeight + 'px;cursor:pointer'"
@@ -138,7 +138,7 @@ function updateIconHeight() {
 function filteredChannels() {
     if (folder.value.subChannelsJson != undefined && folder.value.subChannelsJson != "") {
         return store.state.channels.filter((item) =>
-            folder.value.subChannelsJson.filter(i => i.id == item.id).length == 0)
+            folder.value.subChannelsJson.filter(i => i.channelId == item.channelId).length == 0)
     }
     else return store.state.channels
 }
@@ -186,7 +186,7 @@ function print() {
 
 function onChange(index) {
     for (let i = 0; i < folder.value.subChannelsJson.length; i++) {
-        if (i != index && folder.value.subChannelsJson[i].id == folder.value.subChannelsJson[index].id) {
+        if (i != index && folder.value.subChannelsJson[i].channelId == folder.value.subChannelsJson[index].channelId) {
             folder.value.subChannelsJson.splice(index, 1);
             index = index - 1
             break;
@@ -195,7 +195,7 @@ function onChange(index) {
     index = index + 1
     if (folder.value.subChannelsJson.length > index) {
         for (let i = 0; i < folder.value.subChannelsJson.length; i++) {
-            if (i != index && folder.value.subChannelsJson[i].id == folder.value.subChannelsJson[index].id) {
+            if (i != index && folder.value.subChannelsJson[i].channelId == folder.value.subChannelsJson[index].channelId) {
                 folder.value.subChannelsJson.splice(index, 1);
                 break;
             }

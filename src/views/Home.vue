@@ -1,30 +1,39 @@
 <template>
    <div class="p-2 m-2">
-      <div v-if="store.state.user">
+      <div v-if="store.state.user.name">
          <span v-if="warning != ''" class="mx-auto mb-3">
-            <h3 class="text-danger">Внимание!</h3>
+            <h3 @click="pMsg" class="text-danger ">Внимание!</h3>
             <p class="text-danger my-1">Требования для использования сервиса:</p>
-            <p class="text-danger my-1">1) На аккаунт Google должен быть зарегистрирован профиль(канал) YouTube</p>
-            <p class="text-danger my-1">2) Подписки Вашего профиля YouTube должны быть открыты</p>
+            <p class="text-danger my-1">1) На аккаунт Google должен быть зарегистрирован профиль (канал) YouTube</p>
+            <p class="text-danger my-1">2) Подписки Вашего профиля YouTube должны быть открыты (открыть подписки можно 
+               <a href="https://www.youtube.com/account_privacy" class="text-danger" target="_blank">здесь</a>)</p>
             <p class="text-danger my-1">3) Ваш профиль должен иметь хотя-бы одну подписку</p>
+            <p class="text-danger mt-2">Если все вышеперечисленные требования выполнены - проверьте,
+                правильно ли отображается <a v-bind:href="'https://www.youtube.com/channel/'+store.state.user.youtubeId"
+                  class="text-danger" target="_blank">Ваш канал</a></p>
+            <p class="text-danger my-1 mb-4">Если ссылка ведёт не на Ваш канал, вы можете изменить идентификатор канала в настройках</p>
          </span>
          <div class="d-flex flex-row justify-content-between">
             <h3>Ваши папки:</h3>
             <button @click="createFolder" class="btn btn-secondary">+ Добавить папку</button>
          </div>
          <div class="d-flex flex-row my-2 align-self-start flex-wrap gap-2">
-            <div v-if="loadingTextF != '' && store.state.folders.length == 0" class="h3 text-center"> {{ loadingTextF }} </div>
-            <h3 v-else-if="store.state.folders.length == 0" class="w-100 text-center text-muted my-5"> 
+            <div v-if="loadingTextF != '' && store.state.folders.length == 0" 
+               class="h3 text-center"> {{ loadingTextF }}
+            </div>
+            <h3 v-else-if="store.state.folders.length == 0" class="w-100 text-center text-muted my-5">
                Вы не создали ни одной папки
             </h3>
-            <folder-item v-else v-for="folder in store.state.folders" :id="folder.id" :name="folder.name" :color="folder.color"
-               :icon="folder.icon" :channelsCount="folder.channelsCount" :editable="true" style="max-width: 180px;" />
+            <folder-item v-else v-for="folder in store.state.folders" :id="folder.id" :name="folder.name"
+               :color="folder.color" :icon="folder.icon" :channelsCount="folder.channelsCount" :editable="true"
+               style="max-width: 180px;" />
          </div>
          <hr>
       </div>
       <h3 class="mb-3">Папки в открытом доступе:</h3>
       <div class="d-flex flex-row my-2 align-self-start flex-wrap gap-2">
-         <div v-if="loadingTextPF != '' && !store.state.publicFolders.length" class="h3 text-center"> {{ loadingTextPF }} </div>
+         <div v-if="loadingTextPF != '' && !store.state.publicFolders.length" class="h3 text-center"> {{ loadingTextPF }}
+         </div>
          <folder-item v-if="store.state.publicFolders.length" v-for="folder in store.state.publicFolders" :id="folder.id"
             :name="folder.name" :color="folder.color" :icon="folder.icon" :channelsCount="folder.channelsCount"
             :editable="false" style="max-width: 180px;" />
@@ -44,14 +53,16 @@ const loadingTextF = ref('')
 const loadingTextPF = ref('')
 loadingTextPF.value = "Загрузка..."
 const route = useRoute()
-if (route.query.f != undefined){
-   let routeName = route.query.e ? "editFolder" : "folder";
+if (route.query.f != undefined) {
+   let routeName = route.query.e == true ? "editFolder" : "folder";
    router.push({
-    name: routeName,
-    params: { "folder": route.query.f }
- })
+      name: routeName,
+      params: { "folder": route.query.f }
+   })
 }
-
+else if (route.query.s == true) {
+   router.push({ name: "settings" })
+}
 
 onMounted(() => {
    if (!store.state.publicFolders.length) {
@@ -69,7 +80,7 @@ onMounted(() => {
          if (store.state.channels.length == 0) {
             warning.value = "Внимание!"
          }
-         else{
+         else {
             warning.value = ""
             unsubscribeSetChannels()
          }

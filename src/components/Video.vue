@@ -65,6 +65,9 @@ const dateString = computed(() => {
         + " " + new Date(props.publishedAt).toLocaleDateString()
 })
 const viewCountString = computed(() => {
+    if (props.viewCount == ""){
+        return "Прямая трансляция"
+    }
     let tmp = props.viewCount % 100;
     if (tmp.toString().length == 2 && tmp.toString()[0] == "1") {
         return props.viewCount + " просмотров"

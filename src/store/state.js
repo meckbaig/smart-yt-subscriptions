@@ -5,6 +5,7 @@ export default {
     publicFolders: [],
     lastUpdated: [],
     connectionStates: [],
+    messages: [],
     accessLevels: [ 
         { name: "Private", id: 2, title: "Приватная" }, 
         { name: "LinkAccess", id: 3, title: "Доступ по ссылке" }, 

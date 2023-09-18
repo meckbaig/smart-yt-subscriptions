@@ -1,13 +1,16 @@
 import router from '../router'
 
-export function setUserYtId(state, userYtId){
-  state.userYtId = userYtId || ''
-}
 export function setUser(state, user){
-  state.user = user || ''
+  state.user = user || []
 }
 export function setUserRole(state, role){
   state.user.role = role || ''
+}
+export function setUserId(state, id){
+  state.user.id = id || ''
+}
+export function setUserYoutubeId(state, youtubeId){
+  state.user.youtubeId = youtubeId || ''
 }
 export function setChannels(state, channels){
   state.channels = channels || []
@@ -49,4 +52,11 @@ export function setPublicFolders(state, publicFolders){
   // else{
   //   state.publicFolders = state.publicFolders.concat(publicFolders)
   // }
+}
+export function addMessage(state, message){
+  state.messages.push(message)
+}
+export function removeMessage(state, message){
+  let index = state.messages.findIndex(m => m == message);
+  state.messages.splice(index, 1)
 }

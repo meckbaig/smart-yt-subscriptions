@@ -3,6 +3,7 @@ import Layout from '../components/Layout.vue'
 import Home from '../views/Home.vue'
 import EditFolder from '../views/EditFolder.vue'
 import Folder from '../views/Folder.vue'
+import Settings from '../views/Settings.vue'
 
 const basePath = process.env.NODE_ENV === 'production' ? '/' : '/'
 const routes = [
@@ -24,6 +25,11 @@ const routes = [
                 path: `${basePath}folder/:folder/edit`,
                 name: "editFolder",
                 component: EditFolder,
+            },
+            {
+                path: `${basePath}settings`,
+                name: "settings",
+                component: Settings,
             }
         ]
     }

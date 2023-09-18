@@ -17,6 +17,8 @@
     <div class="container-fluid position-relative" v-bind:style="'min-height:'+mainHeight+'px'">
         <main id="main" role="main" class="pb-3" style="margin-top: 68px;">
             <router-view />
+            <Message v-for="message in store.state.messages" :message="message.message"
+                :title="message.title" :style="message.style"/>
         </main>
     </div>
 
@@ -34,6 +36,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import Identity from './Identity.vue';
+import Message from './Message.vue';
 import store from '../store'
 
 onMounted(() => {
@@ -63,7 +66,7 @@ function updateMainHeight() {
     let df = window.innerHeight
      - document.getElementById("header").clientHeight
      - document.getElementById('footer').clientHeight
-     - 11
+     - 15
     mainHeight.value = df
 }
 
