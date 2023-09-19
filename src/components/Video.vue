@@ -59,8 +59,8 @@ function updateThumbnailDpi() {
         return;
     }
     let width = document.getElementById(props.id).clientWidth * window.devicePixelRatio;
-    let index = 0;
-    for (let i = 0; i < thumbnails.value.length; i++) {
+    let index = 1;
+    for (let i = 1; i < thumbnails.value.length; i++) {
         if (width < thumbnails.value[i].width) {
             break;
         }

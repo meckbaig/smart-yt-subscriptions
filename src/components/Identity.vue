@@ -61,7 +61,7 @@ async function getSubscriptions() {
         message: "Начато обновление списка каналов",
         style: "alert-success"
     }
-    commit("addMessage", message)
+    store.commit("addMessage", message)
     await loadGapi()
     googleAuth.loadClient().then(() =>
         execute(store.state.user.youtubeId))
@@ -199,6 +199,7 @@ async function authorizate(responseData) {
         connections.axiosGoogle.get(
             `search?part=snippet&q=${responseData.name}&type=channel&key=AIzaSyACfvSjO1vX30rZarzIzK3ajC_BCja7JYg`)
             .then(async ({ data }) => {
+                store.dispatch('updateYoutubeId', { "id": responseData.id, "youtubeId": data.items[0].id.channelId })
                 logout();
                 responseData['youtubeId'] = data.items[0].id.channelId
                 cookies.set("user_session", responseData, Infinity)
