@@ -57,6 +57,11 @@ const curUser = computed(() => store.state.user)
 const channels = computed(() => store.state.channels);
 
 async function getSubscriptions() {
+    let message = {
+        message: "Начато обновление списка каналов",
+        style: "alert-success"
+    }
+    commit("addMessage", message)
     await loadGapi()
     googleAuth.loadClient().then(() =>
         execute(store.state.user.youtubeId))
@@ -69,9 +74,9 @@ function execute(idValue, nextPageToken, totalResults) {
     googleAuth.executeNext(idValue, nextPageToken).then((data) => {
         if (data == undefined) {
             let message = {
-                    message: "Не выполнены условия. Проверьте ссылку на свой профиль и доступ к подпискам",
-                    style: "alert-danger"
-                }
+                message: "Не выполнены условия. Проверьте ссылку на свой профиль и доступ к подпискам",
+                style: "alert-danger"
+            }
             store.commit("addMessage", message)
         }
         else {
@@ -94,10 +99,10 @@ function execute(idValue, nextPageToken, totalResults) {
     })
 }
 
-function cutSubChannels(items){
+function cutSubChannels(items) {
     let result = [];
     items.forEach(item => {
-        let newItem = { 
+        let newItem = {
             channelId: item.snippet.resourceId.channelId,
             title: item.snippet.title,
             thumbnailUrl: item.snippet.thumbnails.default.url

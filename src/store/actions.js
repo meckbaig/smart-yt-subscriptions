@@ -37,6 +37,12 @@ export function updateSubChannels({ commit }, payload) {
         { "channels": payload.responseData })
         .then(({ data }) => {
             commit('setLastUpdated', data)
+            let message = {
+                title: "Успех",
+                message: `Список каналов успешно обновлён. Найдено каналов: ${payload.responseData.length}`,
+                style: "alert-success"
+            }
+            commit("addMessage", message)
         });
 }
 export function getUserData({ commit }, payload){

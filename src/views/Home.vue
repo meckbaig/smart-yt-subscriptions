@@ -11,7 +11,8 @@
             <p class="text-danger mt-2">Если все вышеперечисленные требования выполнены - проверьте,
                 правильно ли отображается <a v-bind:href="'https://www.youtube.com/channel/'+store.state.user.youtubeId"
                   class="text-danger" target="_blank">Ваш канал</a></p>
-            <p class="text-danger my-1 mb-4">Если ссылка ведёт не на Ваш канал, вы можете изменить идентификатор канала в настройках</p>
+            <p class="text-danger my-1">Если ссылка ведёт не на Ваш канал, вы можете изменить идентификатор канала в настройках</p>
+            <p class="text-danger my-1 mb-4">Идентификатор канала можно получить в разделе "О канале", нажав на кнопку "поделиться" и выбрав "Скопировать идентификатор канала"</p>
          </span>
          <div class="d-flex flex-row justify-content-between">
             <h3>Ваши папки:</h3>
