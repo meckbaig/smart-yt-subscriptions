@@ -21,7 +21,7 @@ export function contrastColor(color) {
     let r = parseInt(color.substring(1, 3), 16);
     let g = parseInt(color.substring(3, 5), 16);
     let b = parseInt(color.substring(5, 7), 16);
-    if ((r + g + b) > 400) {
+    if (r > 150 || g > 150 || b > 150) {
         return "color:#000000;"
     }
     return "color:#ffffff;"
@@ -32,8 +32,10 @@ export function hoverColor(color) {
     let r = parseInt(color.substring(1, 3), 16);
     let g = parseInt(color.substring(3, 5), 16);
     let b = parseInt(color.substring(5, 7), 16);
-    if ((r + g + b) > 400) {
-        return "#"+(r-diff).toString(16)+(g-diff).toString(16)+(b-diff).toString(16)
+    if (r > 150 || g > 150 || b > 150) {
+        return "#"+(Math.abs(r-diff)).toString(16)
+            +(Math.abs(g-diff)).toString(16)
+            +(Math.abs(b-diff)).toString(16)
     }
     return "#"+(r+diff).toString(16)+(g+diff).toString(16)+(b+diff).toString(16)
 }
