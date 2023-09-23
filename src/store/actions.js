@@ -48,6 +48,8 @@ export function updateSubChannels({ commit }, payload) {
 export function getUserData({ commit }, payload){
     connections.axiosClient.get(`User/GetData?email=${payload.email}&youtubeId=${payload.youtubeId}`)
         .then(({ data }) => {
+            let states = {"backend":true,"database":true}
+            commit('setConnectionStates', states)
             commit('setUserId', data.id)
             commit('setUserYoutubeId', data.youtubeId)
             commit('setUserRole', data.role)

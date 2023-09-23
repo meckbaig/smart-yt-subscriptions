@@ -204,7 +204,7 @@ function onChange(index) {
 }
 
 function updateListsHeight() {
-    if (window.innerHeight < window.innerWidth){
+    if (window.innerHeight < window.innerWidth*1.5){
         channelsListHeight.value = window.innerHeight - document.getElementById("header").clientHeight - 70
         if (document.getElementById("folderButtons")) {
             folderListHeight.value = window.innerHeight - document.getElementById("header").clientHeight

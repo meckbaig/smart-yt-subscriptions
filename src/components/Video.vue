@@ -3,7 +3,7 @@
         <div class="position-relative">
             <a :href="url" target="_blank">
                 <img class="rounded-3 w-100" style="aspect-ratio: 16/9; object-fit: cover" :src="thumbnailDpi" loading="lazy">
-                <p class="badge position-absolute bottom-0 end-0 bg-dark text-wrap opacity-75" style="margin:6px">
+                <p class="badge position-absolute bottom-0 end-0 text-wrap p-1" style="margin:4px; background-color: rgba(0, 0, 0, 0.8);">
                     {{ simpleLendth }}</p>
             </a>
         </div>

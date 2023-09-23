@@ -18,6 +18,6 @@ export default {
         { name: "maxres", url: "hq720.jpg", width: 1280 }
     ],
     theme: 'light',
-    videosOnPage: 20,
+    videosOnPage: 20, 
     debug: false
 }
