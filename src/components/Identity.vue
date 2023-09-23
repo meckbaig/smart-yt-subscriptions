@@ -129,14 +129,14 @@ onMounted(async () => {
     document.documentElement.setAttribute("data-bs-theme", store.state.theme);
     await loadUser()
     return new Promise((reject) => {
-        store.dispatch('getConnectionState').then(() => {
+        //store.dispatch('getConnectionState').then(() => {
             if (curUser.value.name) {
                 store.dispatch('getUserData', { "email": curUser.value.email, "youtubeId": curUser.value.youtubeId })
             }
-        }).catch((error) => {
-            reject(error)
+        //})
+    }).catch((error) => {
+             reject(error)
         })
-    })
 })
 
 async function loadUser() {
