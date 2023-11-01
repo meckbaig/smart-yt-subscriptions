@@ -17,6 +17,11 @@ export default {
         { name: "standard", url: "sddefault.jpg", width: 640 },
         { name: "maxres", url: "hq720.jpg", width: 1280 }
     ],
+    youtubeFolderTypes: [
+        { name: "videos", title: "Видео" },
+        { name: "streams", title: "Трансляции" },
+        { name: "shorts", title: "Shorts" }
+    ],
     theme: 'light',
     videosOnPage: 20, 
     debug: false

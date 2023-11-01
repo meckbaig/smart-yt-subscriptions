@@ -43,7 +43,7 @@ export function hoverColor(color) {
 export function changeTheme() {
     let theme = reverseTheme.value;
     store.commit('setTheme', theme);
-    cookies.set('theme', theme)
+    cookies.set('theme', theme, Infinity)
     document.documentElement.setAttribute("data-bs-theme", theme);
 }
 export const isLightTheme = computed(() => {

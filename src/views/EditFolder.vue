@@ -10,8 +10,7 @@
                 }" item-key="id" style="min-height: 200px; min-width: 200px">
                     <template #item="{ element: item, index: index }">
                         <div v-if="containsSearch(item.title)" class="d-flex flex-row justify-content-between">
-                            <ChannelItem :title="item.title" :id="item.channelId"
-                                :thumbnailUrl="item.thumbnailUrl" />
+                            <ChannelItem :title="item.title" :id="item.channelId" :thumbnailUrl="item.thumbnailUrl" />
                             <a class="m-auto me-2 btn btn-outline-secondary p-0 border border-0" @click="toFolder(index)"
                                 style="cursor: pointer;">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor"
@@ -24,24 +23,29 @@
                     </template>
                 </draggable>
             </div>
-
         </span>
         <span class="px-0 col d-flex flex-column">
             <input v-model="folder.name" class="form-control mb-2" maxlength="50" />
-            <div class="border border-1 align-self-start border-secondary rounded-2 mb-2 w-100"
+            <div class="border border-1 align-self-start border-secondary rounded-2 mb-1 w-100"
                 v-bind:style="'overflow-y: scroll; max-height: ' + folderListHeight + 'px'">
                 <draggable v-model="folder.subChannelsJson" group="channels" item-key="id" :animation="300"
                     style="min-height: 200px; min-width: 200px">
                     <template #item="{ element: item, index: index }">
                         <div @mousemove="onChange(index)" class="d-flex border border-1 border-secondary-subtle rounded-2">
-                            <ChannelItem :title="item.title" :id="item.channelId"
-                                :thumbnailUrl="item.thumbnailUrl" />
+                            <ChannelItem :title="item.title" :id="item.channelId" :thumbnailUrl="item.thumbnailUrl" />
                             <button class="btn btn-close ms-auto p-2" @click="removeAt(index)"></button>
                         </div>
                     </template>
                 </draggable>
             </div>
             <span id="folderButtons">
+                <div class="d-flex gap-2 mb-2">
+                    <div v-for="folderType in store.state.youtubeFolderTypes">
+                        <input type="checkbox" :id="folderType.name" :value="folderType.name" 
+                            :checked="folder.youtubeFolders.includes(folderType.name)" @change="ytFolderCheckedChanged(folderType.name)"/>
+                        <label class="ms-1" :for="folderType.name">{{ folderType.title }}</label>
+                    </div>
+                </div>
                 <div class="d-flex flex-row gap-2 mb-2">
                     <div class="d-flex gap-2 flex-wrap">
                         <div class="input-group p-0" style="min-width: 190px;">
@@ -58,16 +62,16 @@
                             <input type="file" id="uploadIcon" accept="image/*" @change="addIcon" hidden />
                         </label> -->
                     </div>
-                        <img class="rounded rounded-1 align-self-start" title="Удалить иконку" @click="folder.icon = ''"
-                            v-bind:style="'max-height: ' + iconHeight + 'px;cursor:pointer'"
-                            :src="folder.icon" />
+                    <img class="rounded rounded-1 align-self-start" title="Удалить иконку" @click="folder.icon = ''"
+                        v-bind:style="'max-height: ' + iconHeight + 'px;cursor:pointer'" :src="folder.icon" />
                     <div class="d-flex flex-column ms-auto gap-2 mb-auto" id="submitButtons">
                         <button @click="saveChanges" class="btn btn-success">Сохранить</button>
                         <button @click="deleteFolder" class="btn btn-danger">Удалить</button>
                     </div>
                 </div>
                 <!-- <button @click="print">print</button> -->
-                <p class="mb-2 opacity-50">Последнее обновление: {{ new Date(folder.lastChannelsUpdate).toLocaleString() }}</p>
+                <p class="mb-2 opacity-50" @click="print()">Последнее обновление: {{ new Date(folder.lastChannelsUpdate).toLocaleString() }}
+                </p>
             </span>
         </span>
     </div>
@@ -126,11 +130,23 @@ onMounted(async () => {
     // })
 })
 
-function updateIconHeight() {
-    if (document.getElementById("submitButtons")){
-        iconHeight.value = document.getElementById("submitButtons").clientHeight
+function ytFolderCheckedChanged(ytFolderName) {
+    if (folder.value.youtubeFolders.includes(ytFolderName)){
+        folder.value.youtubeFolders.splice(folder.value.youtubeFolders.indexOf(ytFolderName), 1)
     }
     else{
+        if (folder.value.youtubeFolders === ""){
+            folder.value.youtubeFolders = []
+        }
+        folder.value.youtubeFolders = folder.value.youtubeFolders.concat(ytFolderName);
+    }
+}
+
+function updateIconHeight() {
+    if (document.getElementById("submitButtons")) {
+        iconHeight.value = document.getElementById("submitButtons").clientHeight
+    }
+    else {
         window.removeEventListener("resize", updateIconHeight)
     }
 }
@@ -204,17 +220,17 @@ function onChange(index) {
 }
 
 function updateListsHeight() {
-    if (window.innerHeight < window.innerWidth*1.5){
+    if (window.innerHeight < window.innerWidth * 1.5) {
         channelsListHeight.value = window.innerHeight - document.getElementById("header").clientHeight - 70
         if (document.getElementById("folderButtons")) {
             folderListHeight.value = window.innerHeight - document.getElementById("header").clientHeight
                 - 70 - document.getElementById("folderButtons").clientHeight
         }
     }
-    else{
-        channelsListHeight.value = window.innerHeight/2 - document.getElementById("header").clientHeight - 70
-        folderListHeight.value = window.innerHeight/2 - document.getElementById("header").clientHeight
-                 - document.getElementById("folderButtons").clientHeight
+    else {
+        channelsListHeight.value = window.innerHeight / 2 - document.getElementById("header").clientHeight - 70
+        folderListHeight.value = window.innerHeight / 2 - document.getElementById("header").clientHeight
+            - document.getElementById("folderButtons").clientHeight
     }
 }
 
