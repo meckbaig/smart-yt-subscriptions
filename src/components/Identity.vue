@@ -217,7 +217,6 @@ async function authorizate(responseData) {
                                 unsubscribe()
                             }
                         })
-
                     })
             });
     }

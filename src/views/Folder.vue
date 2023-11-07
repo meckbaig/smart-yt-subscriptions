@@ -18,7 +18,7 @@
             <Video v-for="video in visibleVideos" :id="video.id" :title="video.title" :simpleLendth="video.simpleLendth"
                 :viewCount="video.viewCount" :publishedAt="video.publishedAt" :channelId="video.channelId"
                 :channelTitle="video.channelTitle" :channelThumbnail="video.channelThumbnail"
-                :maxThumbnail="video.maxThumbnail"></Video>
+                :maxThumbnail="video.maxThumbnail" :isNew="video.isNew"></Video>
         </div>
         <div v-else v-bind:class="'h3 text-center ' + loadingColor" id="loadingTextDiv">
             {{ loadingText }}

@@ -57,10 +57,10 @@
                         </div>
                         <input v-model="folder.color" type="color" class="h-auto flex-fill" id="colorInput"
                             style="min-height: 38px;" />
-                        <!-- <label for="uploadIcon" class="btn btn-info flex-fill" style="display: block;">
+                        <label for="uploadIcon" class="btn btn-info flex-fill" style="display: block;">
                             Добавить иконку
                             <input type="file" id="uploadIcon" accept="image/*" @change="addIcon" hidden />
-                        </label> -->
+                        </label>
                     </div>
                     <img class="rounded rounded-1 align-self-start" title="Удалить иконку" @click="folder.icon = ''"
                         v-bind:style="'max-height: ' + iconHeight + 'px;cursor:pointer'" :src="folder.icon" />
