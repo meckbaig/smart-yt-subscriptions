@@ -4,8 +4,8 @@
             <input v-model="search" class="form-control mb-2" placeholder="Поиск" />
             <div class="border border-1 border-secondary rounded-2"
                 v-bind:style="'overflow-y: scroll; max-height: ' + channelsListHeight + 'px'">
-                <draggable v-model="channels" :group="{
-                    name: 'channels'
+                <draggable v-model="channels" delay="200" :delay-on-touch-only="true" :group="{
+                    name: 'channels',
                     // , pull: 'clone', put: false 
                 }" item-key="id" style="min-height: 200px; min-width: 200px">
                     <template #item="{ element: item, index: index }">
@@ -29,7 +29,7 @@
             <div class="border border-1 align-self-start border-secondary rounded-2 mb-1 w-100"
                 v-bind:style="'overflow-y: scroll; max-height: ' + folderListHeight + 'px'">
                 <draggable v-model="folder.subChannelsJson" group="channels" item-key="id" :animation="300"
-                    style="min-height: 200px; min-width: 200px">
+                    style="min-height: 200px; min-width: 200px" delay="200" :delay-on-touch-only="true">
                     <template #item="{ element: item, index: index }">
                         <div @mousemove="onChange(index)" class="d-flex border border-1 border-secondary-subtle rounded-2">
                             <ChannelItem :title="item.title" :id="item.channelId" :thumbnailUrl="item.thumbnailUrl" />
