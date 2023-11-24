@@ -23,6 +23,7 @@ export default {
         { name: "shorts", title: "Shorts" }
     ],
     theme: 'light',
+    folderImageSize: [ 50, 160 ],
     videosOnPage: 20, 
     debug: false
 }

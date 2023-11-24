@@ -41,8 +41,9 @@
             <span id="folderButtons">
                 <div class="d-flex gap-2 mb-2">
                     <div v-for="folderType in store.state.youtubeFolderTypes">
-                        <input type="checkbox" :id="folderType.name" :value="folderType.name" 
-                            :checked="folder.youtubeFolders.includes(folderType.name)" @change="ytFolderCheckedChanged(folderType.name)"/>
+                        <input type="checkbox" :id="folderType.name" :value="folderType.name"
+                            :checked="folder.youtubeFolders.includes(folderType.name)"
+                            @change="ytFolderCheckedChanged(folderType.name)" />
                         <label class="ms-1" :for="folderType.name">{{ folderType.title }}</label>
                     </div>
                 </div>
@@ -69,8 +70,9 @@
                         <button @click="deleteFolder" class="btn btn-danger">Удалить</button>
                     </div>
                 </div>
-                <!-- <button @click="print">print</button> -->
-                <p class="mb-2 opacity-50" @click="print()">Последнее обновление: {{ new Date(folder.lastChannelsUpdate).toLocaleString() }}
+                <button @click="print">print</button>
+                <p class="mb-2 opacity-50" @click="print()">Последнее обновление: {{ new
+                    Date(folder.lastChannelsUpdate).toLocaleString() }}
                 </p>
             </span>
         </span>
@@ -131,11 +133,11 @@ onMounted(async () => {
 })
 
 function ytFolderCheckedChanged(ytFolderName) {
-    if (folder.value.youtubeFolders.includes(ytFolderName)){
+    if (folder.value.youtubeFolders.includes(ytFolderName)) {
         folder.value.youtubeFolders.splice(folder.value.youtubeFolders.indexOf(ytFolderName), 1)
     }
-    else{
-        if (folder.value.youtubeFolders === ""){
+    else {
+        if (folder.value.youtubeFolders === "") {
             folder.value.youtubeFolders = []
         }
         folder.value.youtubeFolders = folder.value.youtubeFolders.concat(ytFolderName);
@@ -170,10 +172,30 @@ async function excludeSimilarVideos() {
 }
 
 function addIcon(event) {
-    var file = event.target.files[0];
-    var reader = new FileReader();
+    let file = event.target.files[0];
+    let reader = new FileReader();
     reader.onloadend = function () {
-        folder.value.icon = reader.result
+        let i = new Image();
+        let canvas = document.createElement('canvas');
+        i.onload = function () {
+            let sizes = store.state.folderImageSize;
+            if (i.width > i.height && i.width > sizes[1]*2){
+                canvas.width = sizes[1]*2;
+                canvas.height = Math.floor(canvas.width / i.width * i.height);
+            }
+            else if (i.width < i.height && i.height > sizes[0]*2) {
+                canvas.height = sizes[0]*2;
+                canvas.width = Math.floor(canvas.height / i.height * i.width);
+            }
+            else {
+                canvas.height = i.height;
+                canvas.width = i.width;
+            }
+            let ctx = canvas.getContext('2d');
+            ctx.drawImage(i, 0, 0, canvas.width, canvas.height);
+            folder.value.icon = canvas.toDataURL("image/jpeg", 0.5);
+        };
+        i.src = reader.result;
     }
     reader.readAsDataURL(file);
 }
