@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 export const axiosClient = axios.create({
-  baseURL: process.env.NODE_ENV === 'production' ? "https://folderdataapi.somee.com/" : "http://localhost:5082/" 
+  baseURL: process.env.NODE_ENV === 'production' ? "https://www.syts-backend.ru/" : "https://www.syts-backend.ru/" 
    });
 
 export const axiosGoogle = axios.create({
