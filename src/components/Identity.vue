@@ -89,7 +89,7 @@ function execute(idValue, nextPageToken, totalResults) {
                 store.commit('concatChannels', cutSubChannels(jsonData.items));
             }
             nextPageToken = jsonData.nextPageToken;
-            if (totalResults - channels.value.length > 0 && totalResults > 50) {
+            if ((totalResults - channels.value.length > 0 && totalResults > 50) && nextPageToken != undefined) {
                 execute(idValue, nextPageToken, totalResults)
             }
             else {
