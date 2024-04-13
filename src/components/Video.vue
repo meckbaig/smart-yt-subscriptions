@@ -1,5 +1,5 @@
 <template>
-    <div v-bind:id="id" class="col align-content-center rounded mb-2">
+    <div v-bind:id="id" class="col align-content-top rounded mb-2">
         <div class="position-relative">
             <a :href="url" target="_blank">
                 <img class="rounded-3 w-100" style="aspect-ratio: 16/9; object-fit: cover" :src="thumbnailDpi" loading="lazy">
