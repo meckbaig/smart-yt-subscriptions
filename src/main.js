@@ -46,11 +46,13 @@ export function changeTheme() {
     cookies.set('theme', theme, Infinity)
     document.documentElement.setAttribute("data-bs-theme", theme);
 }
+
 export const isLightTheme = computed(() => {
     if (store.state.theme == "light") {
         return true;
     }
 })
+
 export const reverseTheme = computed(() => {
     if (isLightTheme.value) {
         return "dark";

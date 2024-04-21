@@ -29,8 +29,8 @@
                             {{ viewCountString }}</a>
                         <p class="m-0 p-0 mx-1">•</p>
                         <a class="text-decoration-none text-nowrap text-reset p-0 m-0 fw-normal lh-1"
-                            style="font-size: 14px;">
-                            {{ dateString }}</a>
+                            style="font-size: 14px;" v-bind:title="dateString">
+                            {{ dateParser.formatToRelative(dateString) }}</a>
                     </div>
                 </li>
             </ul>
@@ -41,6 +41,7 @@
 <script setup>
 import { computed, ref, onMounted } from 'vue'
 import { reverseTheme } from "../main";
+import * as dateParser from "../dateParser";
 import store from '../store';
 window.addEventListener('resize', updateThumbnailDpi);
 
