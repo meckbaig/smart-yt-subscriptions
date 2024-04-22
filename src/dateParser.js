@@ -1,3 +1,5 @@
+import { getWording } from "./wordings"
+
 export function formatToRelative(dateString) {
     let date = parseDate(dateString);
     let currentDate = Date.now();
@@ -37,33 +39,12 @@ function getRelative(diffenence) {
     for (let i = secondsToMeasuresPairs.length - 1; i >= 0; i--) {
         let interval = Math.floor(seconds / secondsToMeasuresPairs[i].value);
         if (interval > 0) {
-            return properWording(interval, secondsToMeasuresPairs[i].key) + " назад";
+            return getWording(interval, wordings[secondsToMeasuresPairs[i].key]) + " назад";
         }
     }
 }
 
-function properWording(interval, measure) {
-    let intervalsLastNumber = interval % 10;
-    let tens = Math.floor((interval % 100) / 10);
-    let measureStringPosition;
-
-    if (tens == 1) {
-        measureStringPosition = 2;
-    }
-    else if (intervalsLastNumber == 1) {
-        measureStringPosition = 0;
-    }
-    else if (intervalsLastNumber >= 2 && intervalsLastNumber <= 4) {
-        measureStringPosition = 1;
-    }
-    else {
-        measureStringPosition = 2;
-    }
-
-    return `${interval} ${wordings[measure][measureStringPosition]}`;
-}
-
-let wordings = {
+const wordings = {
     "s": ["секунда", "секунды", "секунд"],
     "min": ["минута", "минуты", "минут"],
     "h": ["час", "часа", "часов"],
@@ -73,7 +54,7 @@ let wordings = {
     "y": ["год", "года", "лет"]
 }
 
-let secondsToMeasuresPairs = [
+const secondsToMeasuresPairs = [
     { value: 1, key: "s" },
     { value: 60, key: "min" },
     { value: 3600, key: "h" },

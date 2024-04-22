@@ -41,6 +41,7 @@
 <script setup>
 import { computed, ref, onMounted } from 'vue'
 import { reverseTheme } from "../main";
+import { getWording } from "../wordings";
 import * as dateParser from "../dateParser";
 import store from '../store';
 window.addEventListener('resize', updateThumbnailDpi);
@@ -97,25 +98,13 @@ const viewCountString = computed(() => {
     if (props.viewCount == "") {
         return "Прямая трансляция"
     }
-    let tmp = props.viewCount % 100;
-    if (tmp.toString().length == 2 && tmp.toString()[0] == "1") {
-        return props.viewCount + " просмотров"
-    }
-    else {
-        switch (tmp % 10) {
-            case 1:
-                return props.viewCount + " просмотр";
-            case 2:
-            case 3:
-            case 4:
-                return props.viewCount + " просмотра";
-            default:
-                return props.viewCount + " просмотров";
-        }
-    }
-
+    let inViewCount =props.viewCount.replace(" ", "");
+    let resultString = getWording(inViewCount, wordingsViews);
+    let tmpArr = resultString.split(" ");
+    return `${ Number(tmpArr[0]).toLocaleString('ru-RU')} ${tmpArr[1]}`;
 })
 
+const wordingsViews = ["просмотр", "просмотра", "просмотров" ];
 
 </script>
 
