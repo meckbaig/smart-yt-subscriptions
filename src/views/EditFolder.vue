@@ -71,8 +71,8 @@
                     </div>
                 </div>
                 <button @click="print">print</button>
-                <p class="mb-2 opacity-50" @click="print()">Последнее обновление: {{ new
-                    Date(folder.lastChannelsUpdate).toLocaleString() }}
+                <p class="mb-2 opacity-50" @click="print()" v-bind:title="new Date(folder.lastChannelsUpdate).toLocaleString()">
+                    Последнее обновление: {{ dateParser.formatToRelative(new Date(folder.lastChannelsUpdate)) }}
                 </p>
             </span>
         </span>
@@ -87,6 +87,7 @@ import { sleep } from "../main";
 import ChannelItem from '../components/ChannelItem.vue'
 import draggable from 'vuedraggable';
 import * as connections from "../connections";
+import * as dateParser from "../dateParser";
 import { useRoute } from 'vue-router';
 import { computed, onMounted, ref } from 'vue'
 import store from '../store'

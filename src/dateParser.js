@@ -1,7 +1,7 @@
 import { getWording } from "./wordings"
 
 export function formatToRelative(dateString) {
-    let date = parseDate(dateString);
+    let date = isDate(dateString) ? dateString : parseDate(dateString);
     let currentDate = Date.now();
     let diffenence = currentDate - date;
     if (wasYesterday(date)) {
@@ -10,8 +10,12 @@ export function formatToRelative(dateString) {
     return getRelative(diffenence);
 }
 
+function isDate(variable) {
+    return variable instanceof Date;
+}
+
 function parseDate(str) {
-    var parts = str.split(' ');
+    var parts = str.replace(',', '').split(' ');
     var timeParts = parts[0].split(':');
     var dateParts = parts[1].split('.');
     return new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], timeParts[2]);

@@ -98,7 +98,7 @@ const viewCountString = computed(() => {
     if (props.viewCount == "") {
         return "Прямая трансляция"
     }
-    let inViewCount =props.viewCount.replace(" ", "");
+    let inViewCount = props.viewCount.replace(" ", "");
     let resultString = getWording(inViewCount, wordingsViews);
     let tmpArr = resultString.split(" ");
     return `${ Number(tmpArr[0]).toLocaleString('ru-RU')} ${tmpArr[1]}`;
