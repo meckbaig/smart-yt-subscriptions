@@ -25,8 +25,6 @@
 <script setup>
 import { ref } from 'vue'
 import { contrastColor, hoverColor, reverseTheme } from "../main";
-const bgColor = ref('')
-bgColor.value = props.color
 
 const props = defineProps({
     id: String,
@@ -36,6 +34,9 @@ const props = defineProps({
     channelsCount: String,
     editable: Boolean
 })
+
+const bgColor = ref('')
+bgColor.value = props.color
 
 function borderThicness(){
     if (props.color == "#ffffff" || props.color == "#212529"){

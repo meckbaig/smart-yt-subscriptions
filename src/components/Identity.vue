@@ -6,7 +6,8 @@
             <img v-bind:src="curUser.picture" width="32" height="32" class="rounded-circle me-2">
             {{ curUser.name }}
         </button>
-        <ul class="dropdown-menu dropdown-menu-end w-100 fs-5" aria-labelledby="profile-dropdown" style="min-width: 200px;">
+        <ul class="dropdown-menu dropdown-menu-end w-100 fs-5" aria-labelledby="profile-dropdown"
+            style="min-width: 200px;">
             <li>
                 <a v-bind:href="'https://www.youtube.com/channel/' + curUser.youtubeId" target="_blank"
                     class="dropdown-item text-center">
@@ -14,7 +15,7 @@
                 </a>
             </li>
             <li>
-                <button @click="getSubscriptions" class="dropdown-item text-center text-wrap lh-1">
+                <button @click="getSubscriptions3" class="dropdown-item text-center text-wrap lh-1">
                     Обновить список каналов
                 </button>
             </li>
@@ -46,10 +47,11 @@
 <script setup>
 import * as connections from "../connections";
 import * as googleAuth from '../googleAuth'
+import * as googleAuth2 from '../googleAuth2'
 import cookies from 'vue-cookies'
 import axios from 'axios'
 import store from '../store'
-import { googleTokenLogin } from 'vue3-google-login'
+import { googleTokenLogin, googleSdkLoaded } from 'vue3-google-login'
 import { computed, onMounted, ref } from 'vue'
 import { changeTheme, isLightTheme, reverseTheme, sleep } from "../main";
 
@@ -65,6 +67,39 @@ async function getSubscriptions() {
     await loadGapi()
     googleAuth.loadClient().then(() =>
         execute(store.state.user.youtubeId))
+}
+
+async function getSubscriptions1() {
+    let res = await googleAuth.initializeAndFetchSubscriptions(store.state.user.youtubeId);
+    console.log(res);
+}
+
+async function getSubscriptions2() {
+    googleSdkLoaded(google => {
+        google.accounts.oauth2
+            .initCodeClient({
+                client_id: "client_id",
+                scope: "https://www.googleapis.com/auth/youtube.readonly",
+                redirect_uri: "http://localhost:5173/",
+                callback: async response => {
+                    console.log(response);
+                    let response2 = await axios.post("https://oauth2.googleapis.com/token", {
+                        code: response.code,
+                        client_id:
+                            "client_id",
+                        client_secret: "client_secret",
+                        redirect_uri: "/",
+                        grant_type: "authorization_code"
+                    });
+                    console.log(response2);
+                }
+            })
+            .requestCode();
+    });
+}
+
+async function getSubscriptions3() {
+    await execute2(store.state.user.youtubeId);
 }
 
 function execute(idValue, nextPageToken, totalResults) {
@@ -99,6 +134,63 @@ function execute(idValue, nextPageToken, totalResults) {
     })
 }
 
+async function execute2(idValue, nextPageToken, totalResults) {
+    if (nextPageToken == undefined) {
+        store.commit('setChannels', "");
+    }
+    googleAuth2.executeNext(idValue, nextPageToken).then(async (data) =>  {
+        if (data == undefined) {
+            let message = {
+                message: "Не выполнены условия. Проверьте ссылку на свой профиль и доступ к подпискам",
+                style: "alert-danger"
+            }
+            store.commit("addMessage", message)
+        }
+        else {
+            let jsonData = data;
+            await checkChannelsForTitles(jsonData)
+
+            if (channels.value.length == 0) {
+                store.commit('setChannels', cutSubChannels(jsonData.items));
+                totalResults = jsonData.pageInfo.totalResults;
+            }
+            else {
+                store.commit('concatChannels', cutSubChannels(jsonData.items));
+            }
+            nextPageToken = jsonData.nextPageToken;
+            if ((totalResults - channels.value.length > 0 && totalResults > 50) && nextPageToken != undefined) {
+                await execute2(idValue, nextPageToken, totalResults)
+            }
+            else {
+                store.dispatch('updateSubChannels', { "id": store.state.user.id, "responseData": store.state.channels })
+            }
+        }
+    })
+}
+
+async function checkChannelsForTitles(channels) {
+    let idsWithoutTitle = [];
+    channels.items.forEach(item => {
+        if (item.snippet.title == undefined) {
+            idsWithoutTitle.push(item.snippet.resourceId.channelId);
+        }
+    });
+    if (idsWithoutTitle.length != 0) {
+        let channelsWithTitles = await googleAuth2.getTitles(idsWithoutTitle)
+        let titleMap = {};
+        channelsWithTitles.items.forEach(item => {
+            titleMap[item.id] = item.snippet.title;
+        });
+        channels.items.forEach(channel => {
+            if (titleMap.hasOwnProperty(channel.snippet.resourceId.channelId)) {
+                channel.snippet.title = titleMap[channel.snippet.resourceId.channelId];
+            }
+        });
+    }
+    return channels;
+
+}
+
 function cutSubChannels(items) {
     let result = [];
     items.forEach(item => {
@@ -113,10 +205,11 @@ function cutSubChannels(items) {
 }
 
 async function loadGapi() {
-    let promise = new Promise((resolve, reject) => googleAuth.loadGapi());
-    promise.catch(function (error) {
-        console.log('loadGapi error');
-    });
+    try {
+        await googleAuth.loadGapi();
+    } catch (error) {
+        console.log('loadGapi error', error);
+    }
     await sleep(1000)
     return await sleep(1000)
 }
@@ -130,13 +223,13 @@ onMounted(async () => {
     await loadUser()
     return new Promise((reject) => {
         //store.dispatch('getConnectionState').then(() => {
-            if (curUser.value.name) {
-                store.dispatch('getUserData', { "email": curUser.value.email, "youtubeId": curUser.value.youtubeId })
-            }
+        if (curUser.value.name) {
+            store.dispatch('getUserData', { "email": curUser.value.email, "youtubeId": curUser.value.youtubeId })
+        }
         //})
     }).catch((error) => {
-             reject(error)
-        })
+        reject(error)
+    })
 })
 
 async function loadUser() {
