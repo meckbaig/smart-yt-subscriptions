@@ -60,6 +60,3 @@ export function removeMessage(state, message){
   let index = state.messages.findIndex(m => m == message);
   state.messages.splice(index, 1)
 }
-export function addOauthToken(state, message){
-  state.user.oauthToken = message
-}

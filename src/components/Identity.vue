@@ -15,7 +15,7 @@
                 </a>
             </li>
             <li>
-                <button @click="getSubscriptions3" class="dropdown-item text-center text-wrap lh-1">
+                <button @click="getSubscriptions" class="dropdown-item text-center text-wrap lh-1">
                     Обновить список каналов
                 </button>
             </li>
@@ -46,13 +46,12 @@
 
 <script setup>
 import * as connections from "../connections";
-import * as googleAuth from '../googleAuth'
-import * as googleAuth2 from '../googleAuth2'
+import * as googleAuth from '../googleAuth2'
 import cookies from 'vue-cookies'
 import axios from 'axios'
 import store from '../store'
-import { googleTokenLogin, googleSdkLoaded } from 'vue3-google-login'
-import { computed, onMounted, ref } from 'vue'
+import { googleTokenLogin } from 'vue3-google-login'
+import { computed, onMounted } from 'vue'
 import { changeTheme, isLightTheme, reverseTheme, sleep } from "../main";
 
 const curUser = computed(() => store.state.user)
@@ -64,81 +63,14 @@ async function getSubscriptions() {
         style: "alert-success"
     }
     store.commit("addMessage", message)
-    await loadGapi()
-    googleAuth.loadClient().then(() =>
-        execute(store.state.user.youtubeId))
+    await execute(store.state.user.youtubeId);
 }
 
-async function getSubscriptions1() {
-    let res = await googleAuth.initializeAndFetchSubscriptions(store.state.user.youtubeId);
-    console.log(res);
-}
-
-async function getSubscriptions2() {
-    googleSdkLoaded(google => {
-        google.accounts.oauth2
-            .initCodeClient({
-                client_id: "client_id",
-                scope: "https://www.googleapis.com/auth/youtube.readonly",
-                redirect_uri: "http://localhost:5173/",
-                callback: async response => {
-                    console.log(response);
-                    let response2 = await axios.post("https://oauth2.googleapis.com/token", {
-                        code: response.code,
-                        client_id:
-                            "client_id",
-                        client_secret: "client_secret",
-                        redirect_uri: "/",
-                        grant_type: "authorization_code"
-                    });
-                    console.log(response2);
-                }
-            })
-            .requestCode();
-    });
-}
-
-async function getSubscriptions3() {
-    await execute2(store.state.user.youtubeId);
-}
-
-function execute(idValue, nextPageToken, totalResults) {
+async function execute(idValue, nextPageToken, totalResults) {
     if (nextPageToken == undefined) {
         store.commit('setChannels', "");
     }
-    googleAuth.executeNext(idValue, nextPageToken).then((data) => {
-        if (data == undefined) {
-            let message = {
-                message: "Не выполнены условия. Проверьте ссылку на свой профиль и доступ к подпискам",
-                style: "alert-danger"
-            }
-            store.commit("addMessage", message)
-        }
-        else {
-            let jsonData = JSON.parse(data.body);
-            if (channels.value.length == 0) {
-                store.commit('setChannels', cutSubChannels(jsonData.items));
-                totalResults = jsonData.pageInfo.totalResults;
-            }
-            else {
-                store.commit('concatChannels', cutSubChannels(jsonData.items));
-            }
-            nextPageToken = jsonData.nextPageToken;
-            if ((totalResults - channels.value.length > 0 && totalResults > 50) && nextPageToken != undefined) {
-                execute(idValue, nextPageToken, totalResults)
-            }
-            else {
-                store.dispatch('updateSubChannels', { "id": store.state.user.id, "responseData": store.state.channels })
-            }
-        }
-    })
-}
-
-async function execute2(idValue, nextPageToken, totalResults) {
-    if (nextPageToken == undefined) {
-        store.commit('setChannels', "");
-    }
-    googleAuth2.executeNext(idValue, nextPageToken).then(async (data) =>  {
+    googleAuth.executeNext(idValue, nextPageToken).then(async (data) =>  {
         if (data == undefined) {
             let message = {
                 message: "Не выполнены условия. Проверьте ссылку на свой профиль и доступ к подпискам",
@@ -159,7 +91,7 @@ async function execute2(idValue, nextPageToken, totalResults) {
             }
             nextPageToken = jsonData.nextPageToken;
             if ((totalResults - channels.value.length > 0 && totalResults > 50) && nextPageToken != undefined) {
-                await execute2(idValue, nextPageToken, totalResults)
+                await execute(idValue, nextPageToken, totalResults)
             }
             else {
                 store.dispatch('updateSubChannels', { "id": store.state.user.id, "responseData": store.state.channels })
@@ -176,7 +108,7 @@ async function checkChannelsForTitles(channels) {
         }
     });
     if (idsWithoutTitle.length != 0) {
-        let channelsWithTitles = await googleAuth2.getTitles(idsWithoutTitle)
+        let channelsWithTitles = await googleAuth.getTitles(idsWithoutTitle)
         let titleMap = {};
         channelsWithTitles.items.forEach(item => {
             titleMap[item.id] = item.snippet.title;
@@ -202,16 +134,6 @@ function cutSubChannels(items) {
         result.push(newItem)
     });
     return result;
-}
-
-async function loadGapi() {
-    try {
-        await googleAuth.loadGapi();
-    } catch (error) {
-        console.log('loadGapi error', error);
-    }
-    await sleep(1000)
-    return await sleep(1000)
 }
 
 onMounted(async () => {
