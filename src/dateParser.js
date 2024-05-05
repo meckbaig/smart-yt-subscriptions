@@ -40,6 +40,8 @@ function wasYesterday(date) {
 
 function getRelative(diffenence) {
     let seconds = Math.floor(diffenence / 1000);
+    if (seconds == 0)
+        return "Только что"
     for (let i = secondsToMeasuresPairs.length - 1; i >= 0; i--) {
         let interval = Math.floor(seconds / secondsToMeasuresPairs[i].value);
         if (interval > 0) {
@@ -49,8 +51,8 @@ function getRelative(diffenence) {
 }
 
 const wordings = {
-    "s": ["секунда", "секунды", "секунд"],
-    "min": ["минута", "минуты", "минут"],
+    "s": ["секунду", "секунды", "секунд"],
+    "min": ["минуту", "минуты", "минут"],
     "h": ["час", "часа", "часов"],
     "d": ["день", "дня", "дней"],
     "w": ["неделю", "недели", "недель"],
