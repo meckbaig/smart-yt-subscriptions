@@ -4,8 +4,6 @@ export function formatToRelative(dateString) {
     let date = isDate(dateString) ? dateString : parseDate(dateString);
     let currentDate = Date.now();
     let diffenence = currentDate - date;
-    console.log(currentDate);
-    console.log(date);
     if (wasYesterday(date)) {
         return `Вчера в ${date.toLocaleTimeString()}`;
     }
@@ -42,8 +40,7 @@ function wasYesterday(date) {
 
 function getRelative(diffenence) {
     let seconds = Math.floor(diffenence / 1000);
-    console.log(seconds);
-    if (seconds == 0)
+    if (seconds <= 0)
         return "Только что"
     for (let i = secondsToMeasuresPairs.length - 1; i >= 0; i--) {
         let interval = Math.floor(seconds / secondsToMeasuresPairs[i].value);
