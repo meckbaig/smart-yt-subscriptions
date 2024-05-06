@@ -4,6 +4,8 @@ export function formatToRelative(dateString) {
     let date = isDate(dateString) ? dateString : parseDate(dateString);
     let currentDate = Date.now();
     let diffenence = currentDate - date;
+    console.log(currentDate);
+    console.log(date);
     if (wasYesterday(date)) {
         return `Вчера в ${date.toLocaleTimeString()}`;
     }
