@@ -10,8 +10,8 @@
                 style="max-height:50px;max-width:160px">
             <h2 v-bind:style="contrastColor(folder.color)" class="mt-1">{{ folder.name }}</h2>
             <h5 v-if="lastCall > 0" v-bind:style="contrastColor(folder.color) + 'cursor: pointer;'"
-                class="ms-auto mt-1 text-end d-none d-md-flex" title="Обновить принудительно" @click="getFolderVideos()">
-                Последнее обновление: {{ lastCallString }}</h5>
+                class="ms-auto mt-1 text-end d-none d-md-flex" v-bind:title="lastCallString" @click="refreshFolderVideos()">
+                Последнее обновление: {{ dateParser.formatToRelative(lastCallString) }}</h5>
         </div>
         <div v-if="videos.length > 0"
             class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 row-cols-xxl-6">
@@ -30,6 +30,7 @@
 import { sleep, contrastColor } from "../main";
 import store from '../store'
 import * as connections from "../connections";
+import * as dateParser from "../dateParser";
 import Video from '../components/Video.vue'
 import { useRoute } from 'vue-router';
 import { computed, onMounted, ref } from 'vue'
@@ -58,8 +59,8 @@ onMounted(async () => {
             folder.value = data;
         })
     let localStorageFolderData = JSON.parse(localStorage.getItem(route.params.folder));
-    //1000ms*60s*10m=600000ms
-    if (localStorageFolderData && (Date.now() - localStorageFolderData.lastCall) < 600000) {
+    //1000ms*60s*30m=1_800_000ms
+    if (localStorageFolderData && (Date.now() - localStorageFolderData.lastCall) < 1_800_000) {
         lastCall.value = localStorageFolderData.lastCall;
         videos.value = localStorageFolderData.data;
         checkPosition();
@@ -69,10 +70,10 @@ onMounted(async () => {
     }
 })
 
-function getFolderVideos() {
+async function getFolderVideos() {
     if (Date.now() - lastCall.value > 20000) {
         videos.value = [];
-        connections.axiosClient.get(`Folder/GetVideos?id=${route.params.folder}&userId=${store.state.user.id}`)
+        await connections.axiosClient.get(`Folder/GetVideos?id=${route.params.folder}&userId=${store.state.user.id}`)
             .then(({ data }) => {
                 videos.value = data;
                 lastCall.value = Date.now();
@@ -84,6 +85,11 @@ function getFolderVideos() {
                 loadingColor.value = "text-danger";
             });
     }
+}
+
+async function refreshFolderVideos() {
+    await getFolderVideos();
+    location.reload();
 }
 
 function printConsts() {
