@@ -40,6 +40,7 @@ function wasYesterday(date) {
 
 function getRelative(diffenence) {
     let seconds = Math.floor(diffenence / 1000);
+    console.log(seconds);
     if (seconds == 0)
         return "Только что"
     for (let i = secondsToMeasuresPairs.length - 1; i >= 0; i--) {
