@@ -32,7 +32,7 @@ import store from '../store'
 import * as connections from "../connections";
 import * as dateParser from "../dateParser";
 import Video from '../components/Video.vue'
-import { useRoute } from 'vue-router';
+import { useRoute, onBeforeRouteLeave } from 'vue-router';
 import { computed, onMounted, ref } from 'vue'
 
 let preventLoading = false;
@@ -57,6 +57,7 @@ onMounted(async () => {
     connections.axiosClient.get(`Folder/Get?id=${route.params.folder}&userId=${store.state.user.id}`)
         .then(({ data }) => {
             folder.value = data;
+            document.title = folder.value.name + " - Smart YT Subscriptions";
         })
     let localStorageFolderData = JSON.parse(localStorage.getItem(route.params.folder));
     //1000ms*60s*30m=1_800_000ms
@@ -68,6 +69,10 @@ onMounted(async () => {
     else {
         getFolderVideos();
     }
+})
+
+onBeforeRouteLeave(async () => {
+      document.title = "Smart YT Subscriptions";
 })
 
 async function getFolderVideos() {
