@@ -54,14 +54,14 @@ export function getUserData({ commit }, payload){
             commit('setUserYoutubeId', data.youtubeId)
             commit('setUserRole', data.role)
             if (data.subChannelsJson != ""){
-                commit('setChannels', JSON.parse(data.subChannelsJson))
+                commit('setChannels', data.subChannelsJson)
             }
             else{
                 commit('setChannels')
             }
             commit('setLastUpdated', data.lastChannelsUpdate)
             if (data.folders != ""){
-                commit('setFolders', JSON.parse(data.folders))
+                commit('setFolders', data.folders)
             }
         })
 }
