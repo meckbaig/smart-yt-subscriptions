@@ -156,15 +156,15 @@ function updateIconHeight() {
 
 function filteredChannels() {
     if (folder.value.subChannelsJson != undefined && folder.value.subChannelsJson != "") {
-        return store.state.channels.filter((item) =>
+        return store.state.user.subChannels.filter((item) =>
             folder.value.subChannelsJson.filter(i => i.channelId == item.channelId).length == 0)
     }
-    else return store.state.channels
+    else return store.state.user.subChannels
 }
 
 async function excludeSimilarVideos() {
     while (channels.value.length == 0) {
-        channels.value = store.state.channels;
+        channels.value = store.state.user.subChannels;
         if (channels.value.length != 0) {
             channels.value = channels.value.filter((item) => folder.value.subChannelsJson.filter(i => i.id == item.id).length == 0);
         }

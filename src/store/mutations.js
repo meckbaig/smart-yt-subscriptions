@@ -12,11 +12,11 @@ export function setUserId(state, id){
 export function setUserYoutubeId(state, youtubeId){
   state.user.youtubeId = youtubeId || ''
 }
-export function setChannels(state, channels){
-  state.channels = channels || []
+export function setUserChannels(state, channels){
+  state.user.subChannels = channels || []
 }
-export function concatChannels(state, channels){
-  state.channels = state.channels.concat(channels) || state.channels
+export function concatUserChannels(state, channels){
+  state.user.subChannels = state.user.subChannels.concat(channels) || state.user.subChannels
 }
 export function setLastUpdated(state, lastUpdated){
   state.lastUpdated = lastUpdated || ''

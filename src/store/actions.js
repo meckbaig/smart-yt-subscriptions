@@ -18,9 +18,9 @@ export function updateYoutubeId({ commit }, payload){
                 }
                 commit("addMessage", message)
                 commit("setUserYoutubeId", payload.youtubeId)
-                let user_session = cookies.get('user_session')
-                user_session.youtubeId = payload.youtubeId
-                cookies.set("user_session", user_session, Infinity)
+                let user = JSON.parse(localStorage.getItem('user'))
+                user.youtubeId = payload.youtubeId
+                localStorage.setItem("user", JSON.stringify(user))
             }
             else {
                 let message = {
@@ -95,4 +95,18 @@ export function setPublicFolders({ commit }, userId){
             commit('setPublicFolders', [])
         }
       })
+}
+export async function authorizeUser({ commit }, accessToken) {
+    try {
+        const { data } = await connections.axiosClient.get(`/api/v1/Authorization?accessToken=${accessToken}`);
+        if (data && data.userData) {
+            commit('setUser', data.userData);
+            cookies.set('token', data.token, Infinity);
+            cookies.set('refreshToken', data.refreshToken, Infinity);
+        } else {
+            console.error('Invalid response from Authorization');
+        }
+    } catch (error) {
+        console.error('Error authorizing user:', error);
+    }
 }

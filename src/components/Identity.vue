@@ -55,7 +55,7 @@ import { computed, onMounted } from 'vue'
 import { changeTheme, isLightTheme, reverseTheme, sleep } from "../main";
 
 const curUser = computed(() => store.state.user)
-const channels = computed(() => store.state.channels);
+const channels = computed(() => store.state.user.subChannels); // Relocated from state.channels to state.user.subChannels
 
 async function getSubscriptions() {
     let message = {
@@ -68,9 +68,9 @@ async function getSubscriptions() {
 
 async function execute(idValue, nextPageToken, totalResults) {
     if (nextPageToken == undefined) {
-        store.commit('setChannels', "");
+        store.commit('setUserChannels', ""); // Updated to setUserChannels to reflect the relocation
     }
-    googleAuth.executeNext(idValue, nextPageToken).then(async (data) =>  {
+    googleAuth.executeNext(idValue, nextPageToken).then(async (data) => {
         if (data == undefined) {
             let message = {
                 message: "Не выполнены условия. Проверьте ссылку на свой профиль и доступ к подпискам",
@@ -83,18 +83,18 @@ async function execute(idValue, nextPageToken, totalResults) {
             await checkChannelsForTitles(jsonData)
 
             if (channels.value.length == 0) {
-                store.commit('setChannels', cutSubChannels(jsonData.items));
+                store.commit('setUserChannels', cutSubChannels(jsonData.items)); // Updated to setUserChannels to reflect the relocation
                 totalResults = jsonData.pageInfo.totalResults;
             }
             else {
-                store.commit('concatChannels', cutSubChannels(jsonData.items));
+                store.commit('concatUserChannels', cutSubChannels(jsonData.items)); // Updated to concatUserChannels to reflect the relocation
             }
             nextPageToken = jsonData.nextPageToken;
             if ((totalResults - channels.value.length > 0 && totalResults > 50) && nextPageToken != undefined) {
                 await execute(idValue, nextPageToken, totalResults)
             }
             else {
-                store.dispatch('updateSubChannels', { "id": store.state.user.id, "responseData": store.state.channels })
+                store.dispatch('updateSubChannels', { "id": store.state.user.id, "responseData": store.state.user.subChannels }) // Updated to reflect the relocation
             }
         }
     })
@@ -155,9 +155,9 @@ onMounted(async () => {
 })
 
 async function loadUser() {
-    let user_session = cookies.get('user_session')
-    if (user_session != null) {
-        store.commit('setUser', user_session)
+    let user = localStorage.getItem('user')
+    if (user != null) {
+        store.commit('setUser', JSON.parse(user))
         //1000×60×60×24=86_400_000
         if (Date.now() - localStorage.getItem("lastLogin") > 86_400_000) {
             localStorage.clear()
@@ -167,13 +167,12 @@ async function loadUser() {
 }
 
 const login = () => {
-    googleTokenLogin().then((response) => {
-        callback(response)
+    googleTokenLogin().then(async (response) => {
+        await authCallback(response.access_token)
     })
 }
 
 const logout = () => {
-    cookies.remove('user_session')
     store.commit('setUser')
     store.commit('setChannels')
     store.commit('setFolders')
@@ -181,60 +180,18 @@ const logout = () => {
     localStorage.clear()
 }
 
-const callback = (response) => {
-    axios.request({
-        headers: {
-            Authorization: `Bearer ${response.access_token}`
-        },
-        method: "GET",
-        url: `https://www.googleapis.com/oauth2/v3/userinfo`
-    }).then(async response => {
-        let responseData = response.data;
-        store.dispatch('getUserData', { "email": responseData.email, "youtubeId": "" })
-            .then(async () => {
-                const unsubscribeUserId = store.subscribe(async (mutations, state) => {
-                    if (mutations.type == 'setUserId') {
-                        await sleep(100);
-                        authorizate(responseData)
-                        unsubscribeUserId()
-                    }
-                })
-            })
-    });
-}
+const authCallback = async (access_token) => {
+    await store.dispatch('authorizeUser', access_token);
 
-async function authorizate(responseData) {
-    responseData['id'] = store.state.user.id
-    if (store.state.user.youtubeId != "") {
-        responseData['youtubeId'] = store.state.user.youtubeId
-        cookies.set("user_session", responseData, Infinity)
-        await loadUser()
-    }
-    else {
-        connections.axiosGoogle.get(
-            `search?part=snippet&q=${responseData.name}&type=channel&key=AIzaSyACfvSjO1vX30rZarzIzK3ajC_BCja7JYg`)
-            .then(async ({ data }) => {
-                store.dispatch('updateYoutubeId', { "id": responseData.id, "youtubeId": data.items[0].id.channelId })
-                logout();
-                responseData['youtubeId'] = data.items[0].id.channelId
-                cookies.set("user_session", responseData, Infinity)
-                await loadUser()
-                store.dispatch('getUserData', { "email": curUser.value.email, "youtubeId": curUser.value.youtubeId })
-                    .then(() => {
-                        store.state.publicFolders = [];
-                        store.dispatch("setPublicFolders", store.state.user.id)
-                        const unsubscribe = store.subscribe(async (mutations, state) => {
-                            if (mutations.type == 'setChannels') {
-                                await sleep(100);
-                                if (store.state.channels.length == 0) {
-                                    getSubscriptions();
-                                }
-                                unsubscribe()
-                            }
-                        })
-                    })
-            });
+    localStorage.setItem('user', JSON.stringify(store.state.user));
+    localStorage.setItem("lastLogin", Date.now().toString());
+
+    if (store.state.user.subChannels.length === 0) {
+        getSubscriptions().then(() => {
+            store.dispatch("getFolders", store.state.user.id);
+        });
+    } else {
+        store.dispatch("getFolders", store.state.user.id);
     }
 }
-
 </script>

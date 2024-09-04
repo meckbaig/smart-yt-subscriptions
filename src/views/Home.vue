@@ -78,7 +78,7 @@ onMounted(() => {
       if (mutations.type == 'setChannels') {
          loadingTextF.value = ""
          await sleep(100);
-         if (store.state.channels.length == 0) {
+         if (store.state.user.subChannels.length == 0) {
             warning.value = "Внимание!"
          }
          else {
