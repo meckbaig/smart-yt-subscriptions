@@ -96,6 +96,20 @@ export function setPublicFolders({ commit }, userId){
         }
       })
 }
+export function getFolders({ commit }, userId) {
+    const token = cookies.get('token');
+    connections.axiosClient.get(`/api/v1/Folder`, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(({ data }) => {
+        commit('updateFolders', data);
+    })
+    .catch((error) => {
+        console.error('Error fetching folders:', error);
+    });
+}
 export async function authorizeUser({ commit }, accessToken) {
     try {
         const { data } = await connections.axiosClient.get(`/api/v1/Authorization?accessToken=${accessToken}`);

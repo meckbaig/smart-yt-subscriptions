@@ -60,3 +60,13 @@ export function removeMessage(state, message){
   let index = state.messages.findIndex(m => m == message);
   state.messages.splice(index, 1)
 }
+export function updateFolders(state, data) {
+  if (data.personalFolders) {
+    state.folders = data.personalFolders
+  }
+  if (data.publicFolders) {
+    state.publicFolders = data.publicFolders
+  }
+}
+
+
