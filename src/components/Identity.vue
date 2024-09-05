@@ -142,16 +142,7 @@ onMounted(async () => {
         store.commit('setTheme', theme);
     }
     document.documentElement.setAttribute("data-bs-theme", store.state.theme);
-    await loadUser()
-    return new Promise((reject) => {
-        //store.dispatch('getConnectionState').then(() => {
-        if (curUser.value.name) {
-            store.dispatch('getUserData', { "email": curUser.value.email, "youtubeId": curUser.value.youtubeId })
-        }
-        //})
-    }).catch((error) => {
-        reject(error)
-    })
+    await loadUser();
 })
 
 async function loadUser() {
@@ -174,9 +165,10 @@ const login = () => {
 
 const logout = () => {
     store.commit('setUser')
-    store.commit('setChannels')
     store.commit('setFolders')
     store.commit('setLastUpdated')
+    cookies.remove('token')
+    cookies.remove('refreshToken')
     localStorage.clear()
 }
 
@@ -187,11 +179,8 @@ const authCallback = async (access_token) => {
     localStorage.setItem("lastLogin", Date.now().toString());
 
     if (store.state.user.subChannels.length === 0) {
-        getSubscriptions().then(() => {
-            store.dispatch("getFolders", store.state.user.id);
-        });
-    } else {
-        store.dispatch("getFolders", store.state.user.id);
+        await getSubscriptions();
     }
+    store.dispatch("getFolders", store.state.user.id);
 }
 </script>

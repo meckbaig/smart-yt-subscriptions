@@ -46,6 +46,7 @@ import { computed, onMounted, ref } from 'vue'
 import Identity from './Identity.vue';
 import Message from './Message.vue';
 import store from '../store'
+import cookies from 'vue-cookies'
 import { reverseTheme } from "../main"
 
 onMounted(() => {
@@ -56,6 +57,8 @@ function printall() {
     Object.keys(store.state).forEach(key => {
         console.log(key, store.state[key]);
     });
+    console.log("Token:", cookies.get('token'));
+    console.log("Refresh Token:", cookies.get('refreshToken'));
 }
 
 const connectionStates = computed(() => store.state.connectionStates);

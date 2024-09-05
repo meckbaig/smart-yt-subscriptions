@@ -96,20 +96,6 @@ export function setPublicFolders({ commit }, userId){
         }
       })
 }
-export function getFolders({ commit }, userId) {
-    const token = cookies.get('token');
-    connections.axiosClient.get(`/api/v1/Folder`, {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    })
-    .then(({ data }) => {
-        commit('updateFolders', data);
-    })
-    .catch((error) => {
-        console.error('Error fetching folders:', error);
-    });
-}
 export async function authorizeUser({ commit }, accessToken) {
     try {
         const { data } = await connections.axiosClient.get(`/api/v1/Authorization?accessToken=${accessToken}`);
@@ -123,4 +109,48 @@ export async function authorizeUser({ commit }, accessToken) {
     } catch (error) {
         console.error('Error authorizing user:', error);
     }
+}
+export async function getFolders({ commit }, userId) {
+    let delegate = async () => {
+        let token = cookies.get('token');
+        let headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        try {
+            const { data } = await connections.axiosClient.get(`/api/v1/Folders`, { headers });
+            commit('updateFolders', data);
+        } catch (error) {
+            console.error('Error fetching folders:', error);
+            throw error;
+        }
+    };
+    await refreshTokenWrapper(delegate);
+}
+export async function refreshTokenWrapper(delegate) { 
+    try { 
+        await delegate(); 
+    } catch (error) { 
+        if (!(error.response && error.response.status === 401)) { 
+            throw error; // Rethrow the error if it's not a 401 
+        } 
+        let token = cookies.get('token'); 
+        let refreshToken = cookies.get('refreshToken'); 
+        if (!refreshToken) { 
+            console.error('No refresh token found'); 
+            return; 
+        } 
+        try { 
+            const { data } = await connections.axiosClient.post(`/api/v1/Authorization/RefreshToken`, 
+                { refreshToken: refreshToken }, 
+                { headers: { 'Authorization': `Bearer ${token}` } }
+            ); 
+            if (!(data && data.token)) { 
+                console.error('Failed to refresh token'); 
+                return; 
+            } 
+            cookies.set('token', data.token, Infinity); 
+            cookies.set('refreshToken', data.refreshToken, Infinity); 
+            await delegate(); 
+        } catch (refreshError) { 
+            console.error('Error refreshing token:', refreshError); 
+        } 
+    } 
 }
