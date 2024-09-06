@@ -8,31 +8,31 @@ export function getConnectionState({ commit }) {
             commit('setConnectionStates', data)
         })
 }
-export function updateYoutubeId({ commit }, payload){
-    connections.axiosClient.post(`User/UpdateYoutubeId?id=${payload.id}&youtubeId=${payload.youtubeId}`)
-        .then(({ data }) => {
-            if (data){
-                let message = {
-                    title: "Успех",
-                    message: "Идентификатор youtube успешно обновлён",
-                    style: "alert-success"
-                }
-                commit("addMessage", message)
-                commit("setUserYoutubeId", payload.youtubeId)
-                let user = JSON.parse(localStorage.getItem('user'))
-                user.youtubeId = payload.youtubeId
-                localStorage.setItem("user", JSON.stringify(user))
-            }
-            else {
-                let message = {
-                    title: "Ошибка",
-                    message: "Не удалось обновить идентификатор youtube",
-                    style: "alert-danger"
-                }
-                commit("addMessage", message)
-            }
-        })
-}
+// export function updateYoutubeId({ commit }, payload){
+//     connections.axiosClient.post(`User/UpdateYoutubeId?id=${payload.id}&youtubeId=${payload.youtubeId}`)
+//         .then(({ data }) => {
+//             if (data){
+//                 let message = {
+//                     title: "Успех",
+//                     message: "Идентификатор youtube успешно обновлён",
+//                     style: "alert-success"
+//                 }
+//                 commit("addMessage", message)
+//                 commit("setUserYoutubeId", payload.youtubeId)
+//                 let user = JSON.parse(localStorage.getItem('user'))
+//                 user.youtubeId = payload.youtubeId
+//                 localStorage.setItem("user", JSON.stringify(user))
+//             }
+//             else {
+//                 let message = {
+//                     title: "Ошибка",
+//                     message: "Не удалось обновить идентификатор youtube",
+//                     style: "alert-danger"
+//                 }
+//                 commit("addMessage", message)
+//             }
+//         })
+// }
 export function updateSubChannels({ commit }, payload) {
     connections.axiosClient.post(`User/UpdateSubChannels?id=${payload.id}`,
         { "channels": payload.responseData })
@@ -110,6 +110,38 @@ export async function authorizeUser({ commit }, accessToken) {
     } catch (error) {
         console.error('Error authorizing user:', error);
     }
+}
+export async function updateYoutubeId({ commit, dispatch }, payload) {
+    let delegate = async () => {
+        let token = cookies.get('token');
+        if (!token) {
+            let message = {
+                title: "Ошибка",
+                message: "Вы не авторизованы",
+                style: "alert-danger"
+            }
+            commit("addMessage", message)
+        }
+        let headers = { 'Authorization': `Bearer ${token}` };
+        try {
+            await connections.axiosClient.post(`/api/v1/Users/UpdateYoutubeId`, { youtubeId: payload.youtubeId }, { headers });
+
+            let message = {
+                title: "Успех",
+                message: "Идентификатор youtube успешно обновлён",
+                style: "alert-success"
+            }
+            commit("addMessage", message)
+            commit("setUserYoutubeId", payload.youtubeId)
+            let user = JSON.parse(localStorage.getItem('user'))
+            user.youtubeId = payload.youtubeId
+            localStorage.setItem("user", JSON.stringify(user))
+        } catch (error) {
+            console.error('Error updating youtube id:', error);
+            throw error;
+        }
+    };
+    await refreshTokenWrapper(delegate, { dispatch });
 }
 export async function getFolders({ commit, dispatch }, userId) {
     let delegate = async () => {
