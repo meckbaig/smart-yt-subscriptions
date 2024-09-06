@@ -4,7 +4,7 @@
             <a :href="url" target="_blank">
                 <img class="rounded-3 w-100" style="aspect-ratio: 16/9; object-fit: cover" :src="thumbnailDpi" loading="lazy">
                 <p class="badge position-absolute bottom-0 end-0 text-wrap" style="margin:4px; padding: 4px; padding-top: 2px; background-color: rgba(0, 0, 0, 0.8);">
-                    {{ simpleLendth }}</p>
+                    {{ simpleLength }}</p>
                 <p v-if="isNew" class="badge position-absolute bottom-0 start-0 text-wrap" style="margin:4px; padding: 4px; padding-top: 2px; background-color: rgba(0, 255, 0, 0.8);">Новое</p>
             </a>
         </div>
@@ -74,7 +74,7 @@ function updateThumbnailDpi() {
 const props = defineProps({
     id: String,
     title: String,
-    simpleLendth: String,
+    simpleLength: String,
     viewCount: String,
     publishedAt: String,
     channelId: String,

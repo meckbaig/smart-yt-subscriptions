@@ -15,7 +15,7 @@
         </div>
         <div v-if="videos.length > 0"
             class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 row-cols-xxl-6">
-            <Video v-for="video in visibleVideos" :id="video.id" :title="video.title" :simpleLendth="video.simpleLendth"
+            <Video v-for="video in visibleVideos" :id="video.id" :title="video.title" :simpleLength="video.simpleLength"
                 :viewCount="video.viewCount" :publishedAt="video.publishedAt" :channelId="video.channelId"
                 :channelTitle="video.channelTitle" :channelThumbnail="video.channelThumbnail"
                 :maxThumbnail="video.maxThumbnail" :isNew="video.isNew"></Video>
@@ -52,23 +52,21 @@ const loadingColor = ref([])
 const lastCall = ref([])
 
 onMounted(async () => {
+    document.title = loadingText.value + " - Smart YT Subscriptions";
     window.addEventListener('scroll', checkPosition);
     window.addEventListener('resize', checkPosition);
-    connections.axiosClient.get(`Folder/Get?id=${route.params.folder}&userId=${store.state.user.id}`)
-        .then(({ data }) => {
-            folder.value = data;
-            document.title = folder.value.name + " - Smart YT Subscriptions";
-        })
-    let localStorageFolderData = JSON.parse(localStorage.getItem(route.params.folder));
-    //1000ms*60s*30m=1_800_000ms
-    if (localStorageFolderData && (Date.now() - localStorageFolderData.lastCall) < 1_800_000) {
-        lastCall.value = localStorageFolderData.lastCall;
-        videos.value = localStorageFolderData.data;
-        checkPosition();
-    }
-    else {
-        getFolderVideos();
-    }
+    
+    getFolderVideos();
+    // let localStorageFolderData = JSON.parse(localStorage.getItem(route.params.folder));
+    // //1000ms*60s*30m=1_800_000ms
+    // if (localStorageFolderData && (Date.now() - localStorageFolderData.lastCall) < 1_800_000) {
+    //     lastCall.value = localStorageFolderData.lastCall;
+    //     folder.value = localStorageFolderData.folder;
+    //     videos.value = localStorageFolderData.vides;
+    //     checkPosition();
+    // } else {
+    //     getFolderVideos();
+    // }
 })
 
 onBeforeRouteLeave(async () => {
@@ -78,17 +76,15 @@ onBeforeRouteLeave(async () => {
 async function getFolderVideos() {
     if (Date.now() - lastCall.value > 20000) {
         videos.value = [];
-        await connections.axiosClient.get(`Folder/GetVideos?id=${route.params.folder}&userId=${store.state.user.id}`)
-            .then(({ data }) => {
-                videos.value = data;
-                lastCall.value = Date.now();
-                localStorage.setItem(route.params.folder, JSON.stringify({ "data": data, "lastCall": lastCall.value }));
-                checkPosition();
-            })
-            .catch(function (error) {
-                loadingText.value = error.response.data.title;
-                loadingColor.value = "text-danger";
-            });
+
+        let response = await store.dispatch('getFolder', { folderId: route.params.folder });
+        folder.value = response.folder;
+        videos.value = response.videos;
+        checkPosition();
+        document.title = folder.value.name + " - Smart YT Subscriptions";
+
+        lastCall.value = Date.now();
+        localStorage.setItem(route.params.folder, JSON.stringify({ "folder": folder.value, "videos": videos.value, "lastCall": lastCall.value }));
     }
 }
 
