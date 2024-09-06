@@ -1,5 +1,6 @@
 import * as connections from "../connections";
-import cookies from 'vue-cookies'
+import cookies from 'vue-cookies';
+import router from '../router'; // Added router import
 
 export function getConnectionState({ commit }) {
     connections.axiosClient.get(`Auth/GetConnectionState`)
@@ -110,7 +111,7 @@ export async function authorizeUser({ commit }, accessToken) {
         console.error('Error authorizing user:', error);
     }
 }
-export async function getFolders({ commit }, userId) {
+export async function getFolders({ commit, dispatch }, userId) {
     let delegate = async () => {
         let token = cookies.get('token');
         let headers = token ? { 'Authorization': `Bearer ${token}` } : {};
@@ -122,9 +123,9 @@ export async function getFolders({ commit }, userId) {
             throw error;
         }
     };
-    await refreshTokenWrapper(delegate);
+    await refreshTokenWrapper(delegate, { dispatch });
 }
-export async function refreshTokenWrapper(delegate) { 
+export async function refreshTokenWrapper(delegate, context) { 
     try { 
         await delegate(); 
     } catch (error) { 
@@ -135,6 +136,7 @@ export async function refreshTokenWrapper(delegate) {
         let refreshToken = cookies.get('refreshToken'); 
         if (!refreshToken) { 
             console.error('No refresh token found'); 
+            await context.dispatch('logout');
             return; 
         } 
         try { 
@@ -150,7 +152,25 @@ export async function refreshTokenWrapper(delegate) {
             cookies.set('refreshToken', data.refreshToken, Infinity); 
             await delegate(); 
         } catch (refreshError) { 
-            console.error('Error refreshing token:', refreshError); 
+            if (refreshError.response && refreshError.response.status === 400 && (
+                refreshError.response.data.errors.refreshToken[0].code === "RefreshTokenNotValid" || 
+                refreshError.response.data.errors.refreshToken[0].code === "RefreshTokenExpired")) {
+                console.error('Refresh token is not valid.'); 
+                await context.dispatch('logout');
+                await delegate(); 
+            } else {
+                console.error('Error refreshing token:', refreshError); 
+            }
         } 
     } 
+}
+export async function logout({ commit }) {
+    commit('setUser');
+    commit('setFolders');
+    commit('setLastUpdated');
+    cookies.remove('token');
+    cookies.remove('refreshToken');
+    localStorage.clear();
+    // Redirect to home page
+    router.push({ name: 'home' }); // Using router to redirect
 }

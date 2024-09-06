@@ -164,12 +164,7 @@ const login = () => {
 }
 
 const logout = () => {
-    store.commit('setUser')
-    store.commit('setFolders')
-    store.commit('setLastUpdated')
-    cookies.remove('token')
-    cookies.remove('refreshToken')
-    localStorage.clear()
+    store.dispatch('logout');
 }
 
 const authCallback = async (access_token) => {
