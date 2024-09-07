@@ -100,9 +100,9 @@ export async function deleteFolder({ commit, dispatch }, payload) {
         let token = cookies.get('token');
         let headers = { 'Authorization': `Bearer ${token}` };
         const { data } = await connections.axiosClient.delete(`/api/v1/Folders/${payload.id}`, { headers });
-            if (data == true) {
+        if (data == true) {
             commit('removeFolder', payload.id);
-            }
+        }
     };
     await refreshTokenWrapper(delegate, { dispatch });
 }
@@ -177,12 +177,13 @@ export async function getFolders({ commit, dispatch }, userId) {
     };
     await refreshTokenWrapper(delegate, { dispatch });
 }
-export async function getFolder({ dispatch }, { folderId: folderGuid }) {
+export async function getFolder({ dispatch }, { folderId: folderGuid, info = false }) {
     let delegate = async () => {
         let token = cookies.get('token');
         let headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        let params = info ? { info } : {};
         try {
-            const { data } = await connections.axiosClient.get(`/api/v1/Folders/${folderGuid}`, { headers });
+            const { data } = await connections.axiosClient.get(`/api/v1/Folders/${folderGuid}`, { headers, params });
             return data;
         } catch (error) {
             console.error('Error fetching folder:', error);

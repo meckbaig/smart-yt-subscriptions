@@ -1,5 +1,5 @@
 <template>
-    <div v-if="folder.id" class="row align-self-start p-2 m-2 gap-2">
+    <div v-if="folder.guid" class="row align-self-start p-2 m-2 gap-2">
         <span class="col px-0">
             <input v-model="search" class="form-control mb-2" placeholder="Поиск" />
             <div class="border border-1 border-secondary rounded-2"
@@ -71,8 +71,8 @@
                     </div>
                 </div>
                 <button @click="print">print</button>
-                <p class="mb-2 opacity-50" @click="print()" v-bind:title="new Date(folder.lastChannelsUpdate).toLocaleString()">
-                    Последнее обновление: {{ dateParser.formatToRelative(new Date(folder.lastChannelsUpdate)) }}
+                <p class="mb-2 opacity-50" @click="print()" v-bind:title="getLastUpdateTitle()">
+                    Последнее обновление: {{ getFormattedLastUpdate() }}
                 </p>
             </span>
         </span>
@@ -109,28 +109,16 @@ const loadingColor = ref([])
 
 
 onMounted(async () => {
-    connections.axiosClient.get(`Folder/Get?id=${route.params.folder}&userId=${store.state.user.id}&edit=true`)
-        .then(async ({ data }) => {
-            folder.value = data;
-            if (folder.value.subChannelsJson == "") {
-                folder.value.subChannelsJson = []
-            }
-            await sleep(100)
-            updateListsHeight()
-            updateIconHeight()
-        })
-        .catch(function (error) {
-            loadingText.value = error.response.data.title;
-            loadingColor.value = "text-danger";
-        });
-    //     const unsubscribe = store.subscribe(async (mutations, state) => {
-    //     if (mutations.type == 'setChannels') {
-    //         await sleep(100);
-    //         channels.value = state.channels.filter((item) =>
-    //             folder.value.subChannelsJson.filter(i => i.id == item.id).length == 0)
-    //         unsubscribe()
-    //     }
-    // })
+    try {
+        let data = await store.dispatch('getFolder', { folderId: route.params.folder, info: true });
+        folder.value = data.folder;
+        updateListsHeight();
+        updateIconHeight();
+    } catch (error) {
+        console.error('Error:', error);
+        // loadingText.value = error.response.data.name;
+        // loadingColor.value = "text-danger";
+    }
 })
 
 function ytFolderCheckedChanged(ytFolderName) {
@@ -272,4 +260,11 @@ function removeAt(index) {
 
 let containsSearch = (title) => title.toLowerCase().includes(search.value.toLowerCase())
 
+function getLastUpdateTitle() {
+    return folder.lastChannelsUpdate ? new Date(folder.lastChannelsUpdate).toLocaleString() : '';
+}
+
+function getFormattedLastUpdate() {
+    return dateParser.formatToRelative(folder.lastChannelsUpdate ? new Date(folder.lastChannelsUpdate) : null);
+}
 </script>
