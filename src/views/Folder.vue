@@ -1,17 +1,23 @@
 <template>
     <div class="m-0 p-0 m-sm-2 p-sm-2">
-        <!-- <router-link class="top-0 end-0 position-absolute mt-4 m-2 p-1 btn btn-info"
-            :to="route.params.folder + '/edit'">Редактировать</router-link>
-        <a class="top-0 start-0 position-absolute mt-4 m-2 p-1 btn btn-info" @click="printConsts">Печать констант</a> -->
         <div v-if="folder.color"
             class="d-flex flex-row align-items-center rounded rounded-2 bg-opacity-50 gap-3 mt-2 mb-3 px-3"
             v-bind:style="'background: ' + folder.color">
             <img v-if="folder.icon != ''" v-bind:src="folder.icon" class="rounded rounded-3 align-self-center my-3"
                 style="max-height:50px;max-width:160px">
             <h2 v-bind:style="contrastColor(folder.color)" class="mt-1">{{ folder.name }}</h2>
-            <h5 v-if="lastCall > 0" v-bind:style="contrastColor(folder.color) + 'cursor: pointer;'"
-                class="ms-auto mt-1 text-end d-none d-md-flex" v-bind:title="lastCallString" @click="refreshFolderVideos()">
-                Последнее обновление: {{ dateParser.formatToRelative(lastCallString) }}</h5>
+            <h5 v-if="lastCall > 0" v-bind:style="contrastColor(folder.color)"
+                class="ms-auto mt-1 text-end d-none d-md-flex" v-bind:title="lastCallString">
+                Последнее обновление: {{ dateParser.formatToRelative(lastCallString) }}
+            </h5>
+            <button @click="refreshFolderVideos()" class="btn btn-light mx-0 py-1" v-bind:disabled="refreshButtonLocked">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+                    class="bi bi-arrow-clockwise m-0" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z" />
+                    <path
+                        d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466" />
+                </svg>
+            </button>
         </div>
         <div v-if="videos.length > 0"
             class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 row-cols-xxl-6">
@@ -29,11 +35,10 @@
 <script setup>
 import { sleep, contrastColor } from "../main";
 import store from '../store'
-import * as connections from "../connections";
 import * as dateParser from "../dateParser";
 import Video from '../components/Video.vue'
 import { useRoute, onBeforeRouteLeave } from 'vue-router';
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watchEffect } from 'vue'
 
 let preventLoading = false;
 let page = 0;
@@ -50,13 +55,14 @@ const loadingText = ref([])
 loadingText.value = "Загрузка..."
 const loadingColor = ref([])
 const lastCall = ref([])
+const refreshButtonLocked = ref(true)
 
 onMounted(async () => {
     document.title = loadingText.value + " - Smart YT Subscriptions";
     window.addEventListener('scroll', checkPosition);
     window.addEventListener('resize', checkPosition);
-    
-    getFolderVideos();
+
+    await getFolderVideos();
     // let localStorageFolderData = JSON.parse(localStorage.getItem(route.params.folder));
     // //1000ms*60s*30m=1_800_000ms
     // if (localStorageFolderData && (Date.now() - localStorageFolderData.lastCall) < 1_800_000) {
@@ -67,37 +73,34 @@ onMounted(async () => {
     // } else {
     //     getFolderVideos();
     // }
+    // Set timer for refresh button
+    let timeDiff = lastCall.value - Date.now();
+
+    setTimeout(() => {
+        refreshButtonLocked.value = false;
+    }, timeDiff + 20000);
 })
 
 onBeforeRouteLeave(async () => {
-      document.title = "Smart YT Subscriptions";
+    document.title = "Smart YT Subscriptions";
 })
 
 async function getFolderVideos() {
-    if (Date.now() - lastCall.value > 20000) {
-        videos.value = [];
+    videos.value = [];
 
-        let response = await store.dispatch('getFolder', { folderId: route.params.folder });
-        folder.value = response.folder;
-        videos.value = response.videos;
-        checkPosition();
-        document.title = folder.value.name + " - Smart YT Subscriptions";
-
-        lastCall.value = Date.now();
-        localStorage.setItem(route.params.folder, JSON.stringify({ "folder": folder.value, "videos": videos.value, "lastCall": lastCall.value }));
-    }
+    let response = await store.dispatch('getFolder', { folderId: route.params.folder });
+    folder.value = response.folder;
+    videos.value = response.videos;
+    checkPosition();
+    document.title = folder.value.name + " - Smart YT Subscriptions";
+    lastCall.value = new Date(folder.value.lastVideosAccess);
+    localStorage.setItem(route.params.folder, JSON.stringify({ "folder": folder.value, "videos": videos.value, "lastCall": lastCall.value }));
 }
 
 async function refreshFolderVideos() {
+    refreshButtonLocked.value = true;
     await getFolderVideos();
     location.reload();
-}
-
-function printConsts() {
-    console.log("visibleVideos: ");
-    console.log(visibleVideos.value);
-    console.log("videos: ");
-    console.log(videos.value);
 }
 
 async function checkPosition() {
@@ -123,5 +126,10 @@ async function checkPosition() {
     }
 }
 
-
+watchEffect(async () => {
+    await sleep(1000);
+    setInterval(() => {
+        lastCall.value = new Date(folder.value.lastVideosAccess);
+    }, 5000);
+})
 </script>
