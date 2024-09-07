@@ -78,6 +78,14 @@ export function updateFolder({ commit }, payload) {
 //             commit('addFolder', data)
 //         });
 // }
+// export function deleteFolder({ commit }, payload) {
+//     connections.axiosClient.post(`Folder/Delete?id=${payload.id}&userId=${payload.userId}`)
+//         .then(({ data }) => {
+//             if (data == true) {
+//                 commit('removeFolder', payload.id)
+//             }
+//         });
+// }
 export async function createFolder({ commit, dispatch }, payload) {
     let delegate = async () => {
         let token = cookies.get('token');
@@ -87,10 +95,16 @@ export async function createFolder({ commit, dispatch }, payload) {
     };
     await refreshTokenWrapper(delegate, { dispatch });
 }
+export async function deleteFolder({ commit, dispatch }, payload) {
+    let delegate = async () => {
+        let token = cookies.get('token');
+        let headers = { 'Authorization': `Bearer ${token}` };
+        const { data } = await connections.axiosClient.delete(`/api/v1/Folders/${payload.id}`, { headers });
             if (data == true) {
-                commit('removeFolder', payload.id)
+            commit('removeFolder', payload.id);
             }
-        });
+    };
+    await refreshTokenWrapper(delegate, { dispatch });
 }
 export function setPublicFolders({ commit }, userId) {
     connections.axiosClient.get(`Folder/GetPublicFolders?userId=${userId}`)
