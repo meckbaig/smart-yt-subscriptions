@@ -58,7 +58,7 @@ const folders = computed(() => store.state.folders)
 const publicFolders = computed(() => store.state.publicFolders)
 const route = useRoute()
 if (route.query.f != undefined) {
-   let routeName = route.query.e == true ? "editFolder" : "folder";
+   let routeName = route.query.e == "true" ? "editFolder" : "folder";
    router.push({
       name: routeName,
       params: { "folder": route.query.f }
