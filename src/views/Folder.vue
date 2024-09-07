@@ -10,7 +10,7 @@
                 class="ms-auto mt-1 text-end d-none d-md-flex" v-bind:title="lastCallString">
                 Последнее обновление: {{ dateParser.formatToRelative(lastCallString) }}
             </h5>
-            <button @click="refreshFolderVideos()" class="btn btn-light mx-0 py-1" v-bind:disabled="refreshButtonLocked">
+            <button @click="refreshFolderVideos()" class="btn btn-light mx-0 py-1 ms-auto ms-md-0" v-bind:disabled="refreshButtonLocked">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
                     class="bi bi-arrow-clockwise m-0" viewBox="0 0 16 16">
                     <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z" />
