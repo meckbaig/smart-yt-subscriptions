@@ -28,7 +28,7 @@ export function setTheme(state, theme){
   state.theme = theme || ''
 }
 export function setFolder(state, folder){
-  let index = state.folders.findIndex(x => x.id == folder.id);
+  let index = state.folders.findIndex(x => x.guid == folder.guid);
   state.folders[index] = folder 
 }
 export function addFolder(state, folder){
