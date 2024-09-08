@@ -8,31 +8,6 @@ export function getConnectionState({ commit }) {
             commit('setConnectionStates', data)
         })
 }
-// export function updateYoutubeId({ commit }, payload){
-//     connections.axiosClient.post(`User/UpdateYoutubeId?id=${payload.id}&youtubeId=${payload.youtubeId}`)
-//         .then(({ data }) => {
-//             if (data){
-//                 let message = {
-//                     title: "Успех",
-//                     message: "Идентификатор youtube успешно обновлён",
-//                     style: "alert-success"
-//                 }
-//                 commit("addMessage", message)
-//                 commit("setUserYoutubeId", payload.youtubeId)
-//                 let user = JSON.parse(localStorage.getItem('user'))
-//                 user.youtubeId = payload.youtubeId
-//                 localStorage.setItem("user", JSON.stringify(user))
-//             }
-//             else {
-//                 let message = {
-//                     title: "Ошибка",
-//                     message: "Не удалось обновить идентификатор youtube",
-//                     style: "alert-danger"
-//                 }
-//                 commit("addMessage", message)
-//             }
-//         })
-// }
 export function updateSubChannels({ commit }, payload) {
     connections.axiosClient.post(`User/UpdateSubChannels?id=${payload.id}`,
         { "channels": payload.responseData })
@@ -66,8 +41,8 @@ export async function createFolder({ commit, dispatch }, payload) {
         let token = cookies.get('token');
         let headers = { 'Authorization': `Bearer ${token}` };
         try {
-        const { data } = await connections.axiosClient.post(`/api/v1/Folders`, { name: payload.name }, { headers });
-        commit('addFolder', data.folder);
+            const { data } = await connections.axiosClient.post(`/api/v1/Folders`, { name: payload.name }, { headers });
+            commit('addFolder', data.folder);
         } catch (error) {
             console.error('Failed to create folder:', error);
             throw error;
@@ -89,17 +64,6 @@ export async function deleteFolder({ commit, dispatch }, guid) {
     };
     await refreshTokenWrapper(delegate, { dispatch });
 }
-// export function setPublicFolders({ commit }, userId) {
-//     connections.axiosClient.get(`Folder/GetPublicFolders?userId=${userId}`)
-//         .then(({ data }) => {
-//             if (data != "") {
-//                 commit('setPublicFolders', data)
-//             }
-//             else {
-//                 commit('setPublicFolders', [])
-//             }
-//         })
-// }
 export async function authorizeUser({ commit }, accessToken) {
     try {
         const { data } = await connections.axiosClient.get(`/api/v1/Authorization?accessToken=${accessToken}`);
@@ -177,7 +141,7 @@ export async function getFolder({ dispatch }, { folderId: folderGuid, info = fal
 }
 export async function refreshTokenWrapper(delegate, context) {
     try {
-        return  await delegate();
+        return await delegate();
     } catch (error) {
         if (!(error.response && error.response.status === 401)) {
             throw error; // Rethrow the error if it's not a 401 
