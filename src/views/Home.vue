@@ -27,8 +27,18 @@
             <h3 v-else-if="folders.length == 0" class="w-100 text-center text-muted my-5">
                Вы не создали ни одной папки
             </h3>
-            <folder-item v-else v-for="folder in folders" :guid="folder.guid" :name="folder.name" :color="folder.color"
-               :icon="folder.icon" :channelsCount="folder.channelsCount" :editable="true" style="max-width: 180px;" />
+            <folder-item 
+               v-else 
+               v-for="folder in folders" 
+               :key="folder.guid" 
+               :guid="folder.guid" 
+               :name="folder.name" 
+               :color="folder.color"
+               :icon="folder.icon" 
+               :channelsCount="folder.channelsCount" 
+               :editable="true" 
+               style="max-width: 180px;" 
+            />
          </div>
          <hr>
       </div>

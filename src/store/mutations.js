@@ -32,14 +32,14 @@ export function setFolder(state, folder){
   state.folders[index] = folder 
 }
 export function addFolder(state, folder){
-  state.folders.push(folder)
+  state.folders.unshift(folder)
   router.push({
     name: "editFolder",
-    params: { "folder": folder.id }
+    params: { "folder": folder.guid }
  })
 }
-export function removeFolder(state, folderId){
-  let index = state.folders.findIndex(x => x.id == folderId);
+export function removeFolder(state, folderGuid){
+  let index = state.folders.findIndex(x => x.guid == folderGuid);
   state.folders.splice(index, 1)
 }
 export function setFolders(state, folders){

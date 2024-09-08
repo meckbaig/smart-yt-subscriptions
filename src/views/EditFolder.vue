@@ -200,7 +200,7 @@ function saveChanges() {
 }
 
 function deleteFolder() {
-    store.dispatch("deleteFolder", { "id": route.params.folder, "userId": store.state.user.id });
+    store.dispatch("deleteFolder", route.params.folder );
     router.push({
         name: "home"
     })

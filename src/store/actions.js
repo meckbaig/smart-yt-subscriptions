@@ -91,32 +91,34 @@ export async function createFolder({ commit, dispatch }, payload) {
         let token = cookies.get('token');
         let headers = { 'Authorization': `Bearer ${token}` };
         const { data } = await connections.axiosClient.post(`/api/v1/Folders`, { name: payload.name }, { headers });
-        commit('addFolder', data);
+        commit('addFolder', data.folder);
     };
     await refreshTokenWrapper(delegate, { dispatch });
 }
-export async function deleteFolder({ commit, dispatch }, payload) {
+export async function deleteFolder({ commit, dispatch }, guid) {
     let delegate = async () => {
         let token = cookies.get('token');
         let headers = { 'Authorization': `Bearer ${token}` };
-        const { data } = await connections.axiosClient.delete(`/api/v1/Folders/${payload.id}`, { headers });
-        if (data == true) {
-            commit('removeFolder', payload.id);
+        try {
+            await connections.axiosClient.delete(`/api/v1/Folders/${guid}`, { headers });
+            commit('removeFolder', guid);
+        } catch (error) {
+            console.error('Failed to delete folder:', error);
         }
     };
     await refreshTokenWrapper(delegate, { dispatch });
 }
-export function setPublicFolders({ commit }, userId) {
-    connections.axiosClient.get(`Folder/GetPublicFolders?userId=${userId}`)
-        .then(({ data }) => {
-            if (data != "") {
-                commit('setPublicFolders', data)
-            }
-            else {
-                commit('setPublicFolders', [])
-            }
-        })
-}
+// export function setPublicFolders({ commit }, userId) {
+//     connections.axiosClient.get(`Folder/GetPublicFolders?userId=${userId}`)
+//         .then(({ data }) => {
+//             if (data != "") {
+//                 commit('setPublicFolders', data)
+//             }
+//             else {
+//                 commit('setPublicFolders', [])
+//             }
+//         })
+// }
 export async function authorizeUser({ commit }, accessToken) {
     try {
         const { data } = await connections.axiosClient.get(`/api/v1/Authorization?accessToken=${accessToken}`);
