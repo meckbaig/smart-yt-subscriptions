@@ -28,7 +28,7 @@
             <input v-model="folder.name" class="form-control mb-2" maxlength="50" />
             <div class="border border-1 align-self-start border-secondary rounded-2 mb-1 w-100"
                 v-bind:style="'overflow-y: scroll; max-height: ' + folderListHeight + 'px'">
-                <draggable v-model="folder.subChannelsJson" group="channels" item-key="id" :animation="300"
+                <draggable v-model="folder.subChannels" group="channels" item-key="id" :animation="300"
                     style="min-height: 200px; min-width: 200px" delay="200" :delay-on-touch-only="true">
                     <template #item="{ element: item, index: index }">
                         <div @mousemove="onChange(index)" class="d-flex border border-1 border-secondary-subtle rounded-2">
@@ -51,9 +51,10 @@
                     <div class="d-flex gap-2 flex-wrap">
                         <div class="input-group p-0" style="min-width: 190px;">
                             <label class="input-group-text">Доступ</label>
-                            <select v-model="folder.accessId" class="form-select pe-2">
+                            <select v-model="folder.access.id" class="form-select pe-2" @change="updateAccessName($event.target.value)">
                                 <option v-for="level in store.state.accessLevels" :value="level.id">
-                                    {{ level.title }}</option>
+                                    {{ level.title }}
+                                </option>
                             </select>
                         </div>
                         <input v-model="folder.color" type="color" class="h-auto flex-fill" id="colorInput"
@@ -71,8 +72,8 @@
                     </div>
                 </div>
                 <button @click="print">print</button>
-                <p class="mb-2 opacity-50" @click="print()" v-bind:title="getLastUpdateTitle()">
-                    Последнее обновление: {{ getFormattedLastUpdate() }}
+                <p class="mb-2 opacity-50" @click="print()" v-bind:title="getLastUpdateTitle">
+                    {{ getFormattedLastUpdate }}
                 </p>
             </span>
         </span>
@@ -110,8 +111,13 @@ const loadingColor = ref([])
 
 onMounted(async () => {
     try {
-        let data = await store.dispatch('getFolder', { folderId: route.params.folder, info: true });
-        folder.value = data.folder;
+        let folderData = store.state.folders.find(folder => folder.guid === route.params.folder);
+        if (folderData) {
+            folder.value = folderData;
+        } else {
+            let data = await store.dispatch('getFolder', { folderId: route.params.folder, info: true });
+            folder.value = data.folder;
+        }
         updateListsHeight();
         updateIconHeight();
     } catch (error) {
@@ -143,9 +149,9 @@ function updateIconHeight() {
 }
 
 function filteredChannels() {
-    if (folder.value.subChannelsJson != undefined && folder.value.subChannelsJson != "") {
+    if (folder.value.subChannels != undefined && folder.value.subChannels != "") {
         return store.state.user.subChannels.filter((item) =>
-            folder.value.subChannelsJson.filter(i => i.channelId == item.channelId).length == 0)
+            folder.value.subChannels.filter(i => i.channelId == item.channelId).length == 0)
     }
     else return store.state.user.subChannels
 }
@@ -154,7 +160,7 @@ async function excludeSimilarVideos() {
     while (channels.value.length == 0) {
         channels.value = store.state.user.subChannels;
         if (channels.value.length != 0) {
-            channels.value = channels.value.filter((item) => folder.value.subChannelsJson.filter(i => i.id == item.id).length == 0);
+            channels.value = channels.value.filter((item) => folder.value.subChannels.filter(i => i.id == item.id).length == 0);
         }
         else { await sleep(100); }
     }
@@ -189,14 +195,12 @@ function addIcon(event) {
     reader.readAsDataURL(file);
 }
 
-function saveChanges() {
-    folder.value.channelsCount = folder.value.subChannelsJson.length;
-    connections.axiosClient.post(`Folder/Update`, folder.value)
-        .then((response) => {
-            folder.value.lastChannelsUpdate = response.data.lastChannelsUpdate;
-            console.log(response);
-            store.commit('setFolder', response.data)
-        })
+async function saveChanges() {
+    folder.value.channelsCount = folder.value.subChannels.length;
+    let folderData = await store.dispatch('updateFolder', { folder: folder.value });
+    if (folderData) {
+        folder.value = folderData;
+    }
 }
 
 function deleteFolder() {
@@ -207,23 +211,22 @@ function deleteFolder() {
 }
 
 function print() {
-    folder.value.channelsCount = folder.value.subChannelsJson.length;
-    console.log(JSON.stringify(folder.value));
+    console.log(folder.value);
 }
 
 function onChange(index) {
-    for (let i = 0; i < folder.value.subChannelsJson.length; i++) {
-        if (i != index && folder.value.subChannelsJson[i].channelId == folder.value.subChannelsJson[index].channelId) {
-            folder.value.subChannelsJson.splice(index, 1);
+    for (let i = 0; i < folder.value.subChannels.length; i++) {
+        if (i != index && folder.value.subChannels[i].channelId == folder.value.subChannels[index].channelId) {
+            folder.value.subChannels.splice(index, 1);
             index = index - 1
             break;
         }
     }
     index = index + 1
-    if (folder.value.subChannelsJson.length > index) {
-        for (let i = 0; i < folder.value.subChannelsJson.length; i++) {
-            if (i != index && folder.value.subChannelsJson[i].channelId == folder.value.subChannelsJson[index].channelId) {
-                folder.value.subChannelsJson.splice(index, 1);
+    if (folder.value.subChannels.length > index) {
+        for (let i = 0; i < folder.value.subChannels.length; i++) {
+            if (i != index && folder.value.subChannels[i].channelId == folder.value.subChannels[index].channelId) {
+                folder.value.subChannels.splice(index, 1);
                 break;
             }
         }
@@ -246,25 +249,33 @@ function updateListsHeight() {
 }
 
 function toFolder(index) {
-    folder.value.subChannelsJson = channels.value.splice(index, 1).concat(folder.value.subChannelsJson)
-    //this.folder.subChannelsJson = this.folder.subChannelsJson.append(this.channels[index]);
-    // if (this.folder.subChannelsJson[this.folder.subChannelsJson.length-1] == ""){
-    //     this.folder.subChannelsJson.pop();
+    folder.value.subChannels = channels.value.splice(index, 1).concat(folder.value.subChannels)
+    //this.folder.subChannels = this.folder.subChannels.append(this.channels[index]);
+    // if (this.folder.subChannels[this.folder.subChannels.length-1] == ""){
+    //     this.folder.subChannels.pop();
     // }    
 }
 
 function removeAt(index) {
-    //this.channels = this.folder.subChannelsJson.splice(index, 1).concat(this.channels)
-    folder.value.subChannelsJson.splice(index, 1)
+    //this.channels = this.folder.subChannels.splice(index, 1).concat(this.channels)
+    folder.value.subChannels.splice(index, 1)
 }
 
 let containsSearch = (title) => title.toLowerCase().includes(search.value.toLowerCase())
 
-function getLastUpdateTitle() {
-    return folder.lastChannelsUpdate ? new Date(folder.lastChannelsUpdate).toLocaleString() : '';
-}
+const getLastUpdateTitle = computed(() => {
+    return folder.value.lastChannelsUpdate ? new Date(folder.value.lastChannelsUpdate).toLocaleString() : '';
+})
 
-function getFormattedLastUpdate() {
-    return dateParser.formatToRelative(folder.lastChannelsUpdate ? new Date(folder.lastChannelsUpdate) : null);
+const getFormattedLastUpdate = computed(() => {
+    return "Последнее обновление: " + dateParser.formatToRelative(
+        folder.value.lastChannelsUpdate ? new Date(folder.value.lastChannelsUpdate) : null);
+})
+
+function updateAccessName(selectedId) {
+    const selectedLevel = store.state.accessLevels.find(level => level.id === parseInt(selectedId));
+    if (selectedLevel) {
+        folder.value.access.name = selectedLevel.name;
+    }
 }
 </script>

@@ -46,46 +46,21 @@ export function updateSubChannels({ commit }, payload) {
             commit("addMessage", message)
         });
 }
-export function getUserData({ commit }, payload) {
-    connections.axiosClient.get(`User/GetData?email=${payload.email}&youtubeId=${payload.youtubeId}`)
-        .then(({ data }) => {
-            let states = { "backend": true, "database": true }
-            commit('setConnectionStates', states)
-            commit('setUserId', data.id)
-            commit('setUserYoutubeId', data.youtubeId)
-            commit('setUserRole', data.role)
-            if (data.subChannelsJson != "") {
-                commit('setChannels', data.subChannelsJson)
-            }
-            else {
-                commit('setChannels')
-            }
-            commit('setLastUpdated', data.lastChannelsUpdate)
-            if (data.folders != "") {
-                commit('setFolders', data.folders)
-            }
-        })
+export async function updateFolder({ commit, dispatch }, payload) {
+    let delegate = async () => {
+        let token = cookies.get('token');
+        let headers = { 'Authorization': `Bearer ${token}` };
+        try {
+            const { data } = await connections.axiosClient.put(`/api/v1/Folders/${payload.folder.guid}`, payload, { headers });
+            commit('setFolder', data.folder);
+            return data.folder; 
+        } catch (error) {
+            console.error('Failed to update folder:', error);
+            throw error;
+        }
+    };
+    return await refreshTokenWrapper(delegate, { dispatch });
 }
-export function updateFolder({ commit }, payload) {
-    connections.axiosClient.post(`Folder/Update`, payload)
-        .then(({ data }) => {
-            commit('setFolder', data)
-        });
-}
-// export function createFolder({ commit }, payload) {
-//     connections.axiosClient.post(`Folder/Create?id=${payload.id}&name=${payload.name}`)
-//         .then(({ data }) => {
-//             commit('addFolder', data)
-//         });
-// }
-// export function deleteFolder({ commit }, payload) {
-//     connections.axiosClient.post(`Folder/Delete?id=${payload.id}&userId=${payload.userId}`)
-//         .then(({ data }) => {
-//             if (data == true) {
-//                 commit('removeFolder', payload.id)
-//             }
-//         });
-// }
 export async function createFolder({ commit, dispatch }, payload) {
     let delegate = async () => {
         let token = cookies.get('token');
