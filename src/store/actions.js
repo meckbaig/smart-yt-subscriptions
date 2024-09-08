@@ -90,8 +90,13 @@ export async function createFolder({ commit, dispatch }, payload) {
     let delegate = async () => {
         let token = cookies.get('token');
         let headers = { 'Authorization': `Bearer ${token}` };
+        try {
         const { data } = await connections.axiosClient.post(`/api/v1/Folders`, { name: payload.name }, { headers });
         commit('addFolder', data.folder);
+        } catch (error) {
+            console.error('Failed to create folder:', error);
+            throw error;
+        }
     };
     await refreshTokenWrapper(delegate, { dispatch });
 }
@@ -104,6 +109,7 @@ export async function deleteFolder({ commit, dispatch }, guid) {
             commit('removeFolder', guid);
         } catch (error) {
             console.error('Failed to delete folder:', error);
+            throw error;
         }
     };
     await refreshTokenWrapper(delegate, { dispatch });
