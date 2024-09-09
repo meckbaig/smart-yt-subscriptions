@@ -123,16 +123,24 @@ onMounted(async () => {
         updateIconHeight();
     } catch (error) {
         console.error('Error:', error);
-        if (error.response && error.response.status === 403) {
-            noAccess.value = true;
-            loadingText.value = "У вас нет доступа к редактированию данной папки";
-            loadingColor.value = "text-danger";
-        } else {
-            loadingText.value = "Произошла ошибка при загрузке папки";
-            loadingColor.value = "text-danger";
-        }
+        handleErrors(error);
     }
 })
+
+function handleErrors(error) {
+    if (error.response && error.response.status === 403) {
+        noAccess.value = true;
+        loadingText.value = "У вас нет доступа к редактированию данной папки";
+        loadingColor.value = "text-danger";
+    } else if (error.response && error.response.status === 400 && 
+               error.response.data.errors?.guid?.[0]?.code === "FolderDoesNotExist") {
+        loadingText.value = "Указанная папка не существует";
+        loadingColor.value = "text-danger";
+    } else {
+        loadingText.value = "Произошла ошибка при загрузке папки";
+        loadingColor.value = "text-danger";
+    }
+}
 
 function ytFolderCheckedChanged(ytFolderName) {
     if (folder.value.youtubeFolders.includes(ytFolderName)) {

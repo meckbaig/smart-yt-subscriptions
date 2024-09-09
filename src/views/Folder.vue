@@ -99,15 +99,23 @@ async function getFolderVideos() {
         lastCall.value = new Date(folder.value.lastVideosAccess);
         localStorage.setItem(route.params.folder, JSON.stringify({ "folder": folder.value, "videos": videos.value, "lastCall": lastCall.value }));
     } catch (error) {
-        if (error.response && error.response.status === 403) {
-            noAccess.value = true;
-            loadingText.value = "У вас нет доступа к данной папке";
-            loadingColor.value = "text-danger";
-        } else {
-            console.error('Error fetching folder:', error);
-            loadingText.value = "Произошла ошибка при загрузке папки";
-            loadingColor.value = "text-danger";
-        }
+        handleErrors(error);
+    }
+}
+
+function handleErrors(error) {
+    if (error.response && error.response.status === 403) {
+        noAccess.value = true;
+        loadingText.value = "У вас нет доступа к данной папке";
+        loadingColor.value = "text-danger";
+    } else if (error.response && error.response.status === 400 && 
+               error.response.data.errors?.guid?.[0]?.code === "FolderDoesNotExist") {
+        loadingText.value = "Указанная папка не существует";
+        loadingColor.value = "text-danger";
+    } else {
+        console.error('Error fetching folder:', error);
+        loadingText.value = "Произошла ошибка при загрузке папки";
+        loadingColor.value = "text-danger";
     }
 }
 
