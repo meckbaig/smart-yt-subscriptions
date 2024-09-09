@@ -118,26 +118,12 @@ onMounted(() => {
 })
 
 async function createFolder() {
-   new Promise((resolve, reject) => {
-      store.dispatch("createFolder", { "id": store.state.user.id, "name": "New folder 1" });
-      resolve();
-   }).then(() => {
-      // let subscribe = store.subscribe((mutation, state) => {
-      //    let folder = store.state.folders[store.state.folders.length - 1]
-      //    router.push({
-      //       name: "folder",
-      //       params: { "folder": folder.id }
-      //    })
-      //    subscribe()
-      //})
-
-
-      // let folder = store.state.folders[store.state.folders.length - 1]
-      // let id = folder.id
-      // router.push({
-      //    name: "folder",
-      //    params: { "folder": folder.id }  
-      // })
-   })
+   let folderName = "New folder 1";
+   let existingFolders = store.state.folders.map(folder => folder.name);
+   let counter = 1;
+   while (existingFolders.includes(folderName)) {
+      folderName = `New folder ${++counter}`;
+   }
+   await store.dispatch("createFolder", { "id": store.state.user.id, "name": folderName });
 }
 </script>
