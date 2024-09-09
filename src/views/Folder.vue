@@ -51,8 +51,7 @@ const visibleVideos = ref([])
 const videos = ref([])
 const folder = ref([])
 const route = useRoute();
-const loadingText = ref([])
-loadingText.value = "Загрузка..."
+const loadingText = ref("Загрузка...")
 const loadingColor = ref([])
 const lastCall = ref([])
 const refreshButtonLocked = ref(true)
@@ -94,6 +93,10 @@ async function getFolderVideos() {
         let response = await store.dispatch('getFolder', { folderId: route.params.folder });
         folder.value = response.folder;
         videos.value = response.videos;
+        if (videos.value.length == 0) {
+            loadingText.value = "Папка пуста";
+            loadingColor.value = "text-muted";
+        }
         checkPosition();
         document.title = folder.value.name + " - Smart YT Subscriptions";
         lastCall.value = new Date(folder.value.lastVideosAccess);
