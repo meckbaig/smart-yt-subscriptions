@@ -20,7 +20,7 @@ export async function updateSubChannels({ commit, dispatch }, responseData) {
             throw error;
         }
     };
-    await refreshTokenWrapper(delegate, { dispatch });
+    await refreshTokenWrapper(delegate, { commit, dispatch });
 }
 export async function updateFolder({ commit, dispatch }, payload) {
     let delegate = async () => {
@@ -35,7 +35,7 @@ export async function updateFolder({ commit, dispatch }, payload) {
             throw error;
         }
     };
-    return await refreshTokenWrapper(delegate, { dispatch });
+    return await refreshTokenWrapper(delegate, { commit, dispatch });
 }
 export async function createFolder({ commit, dispatch }, payload) {
     let delegate = async () => {
@@ -49,7 +49,7 @@ export async function createFolder({ commit, dispatch }, payload) {
             throw error;
         }
     };
-    await refreshTokenWrapper(delegate, { dispatch });
+    await refreshTokenWrapper(delegate, { commit, dispatch });
 }
 export async function deleteFolder({ commit, dispatch }, guid) {
     let delegate = async () => {
@@ -63,7 +63,7 @@ export async function deleteFolder({ commit, dispatch }, guid) {
             throw error;
         }
     };
-    await refreshTokenWrapper(delegate, { dispatch });
+    await refreshTokenWrapper(delegate, { commit, dispatch });
 }
 export async function authorizeUser({ commit }, accessToken) {
     try {
@@ -109,7 +109,7 @@ export async function updateYoutubeId({ commit, dispatch }, payload) {
             throw error;
         }
     };
-    await refreshTokenWrapper(delegate, { dispatch });
+    await refreshTokenWrapper(delegate, { commit, dispatch });
 }
 export async function getFolders({ commit, dispatch }, userId) {
     let delegate = async () => {
@@ -123,9 +123,9 @@ export async function getFolders({ commit, dispatch }, userId) {
             throw error;
         }
     };
-    await refreshTokenWrapper(delegate, { dispatch });
+    await refreshTokenWrapper(delegate, { commit, dispatch });
 }
-export async function getFolder({ dispatch }, { folderId: folderGuid, info = false }) {
+export async function getFolder({ commit, dispatch }, { folderId: folderGuid, info = false }) {
     let delegate = async () => {
         let token = cookies.get('token');
         let headers = token ? { 'Authorization': `Bearer ${token}` } : {};
@@ -138,11 +138,37 @@ export async function getFolder({ dispatch }, { folderId: folderGuid, info = fal
             throw error;
         }
     };
-    return refreshTokenWrapper(delegate, { dispatch });
+    return refreshTokenWrapper(delegate, { commit, dispatch });
+}
+export async function apiWrapper({ commit }, apiCall) {
+    try {
+        const result = await apiCall();
+        commit('setConnectionStates', { backend: true, database: true });
+        return result;
+    } catch (error) {
+        if (error.response) {
+            // The request was made and the server responded with a status code
+            // that falls out of the range of 2xx
+            if (error.response.data.errors && 
+                error.response.data.errors.Undefined && 
+                error.response.data.errors.Undefined[0].code === "DatabaseException") {
+                commit('setConnectionStates', { backend: true, database: false });
+            } else {
+                commit('setConnectionStates', { backend: true, database: true });
+            }
+        } else if (error.request) {
+            // The request was made but no response was received
+            commit('setConnectionStates', { backend: false, database: false });
+        } else {
+            // Something happened in setting up the request that triggered an Error
+            commit('setConnectionStates', { backend: false, database: false });
+        }
+        throw error;
+    }
 }
 export async function refreshTokenWrapper(delegate, context) {
     try {
-        return await delegate();
+        return await apiWrapper(context, delegate);
     } catch (error) {
         if (!(error.response && error.response.status === 401)) {
             throw error; // Rethrow the error if it's not a 401 
@@ -155,9 +181,11 @@ export async function refreshTokenWrapper(delegate, context) {
             return;
         }
         try {
-            const { data } = await connections.axiosClientV1.post(`Authorization/RefreshToken`,
-                { refreshToken: refreshToken },
-                { headers: { 'Authorization': `Bearer ${token}` } }
+            const { data } = await apiWrapper(context, () => 
+                connections.axiosClientV1.post(`Authorization/RefreshToken`,
+                    { refreshToken: refreshToken },
+                    { headers: { 'Authorization': `Bearer ${token}` } }
+                )
             );
             if (!(data && data.token)) {
                 console.error('Failed to refresh token');
@@ -165,14 +193,14 @@ export async function refreshTokenWrapper(delegate, context) {
             }
             cookies.set('token', data.token, Infinity);
             cookies.set('refreshToken', data.refreshToken, Infinity);
-            return await delegate();
+            return await apiWrapper(context, delegate);
         } catch (refreshError) {
             if (refreshError.response && refreshError.response.status === 400 && (
                 refreshError.response.data.errors.refreshToken[0].code === "RefreshTokenNotValid" ||
                 refreshError.response.data.errors.refreshToken[0].code === "RefreshTokenExpired")) {
                 console.error('Refresh token is not valid.');
                 await context.dispatch('logout');
-                await delegate();
+                await apiWrapper(context, delegate);
             } else {
                 console.error('Error refreshing token:', refreshError);
             }

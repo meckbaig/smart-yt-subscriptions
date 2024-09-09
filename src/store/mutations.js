@@ -21,8 +21,11 @@ export function concatUserChannels(state, channels){
 export function setLastUpdated(state, lastUpdated){
   state.lastUpdated = lastUpdated || ''
 }
-export function setConnectionStates(state, connectionStates){
-  state.connectionStates = connectionStates || ''
+export function setConnectionStates(state, { backend, database }) {
+  state.connectionStates = {
+    backend: backend,
+    database: database
+  };
 }
 export function setTheme(state, theme){
   state.theme = theme || ''
