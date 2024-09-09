@@ -56,6 +56,7 @@ loadingText.value = "Загрузка..."
 const loadingColor = ref([])
 const lastCall = ref([])
 const refreshButtonLocked = ref(true)
+const noAccess = ref(false)
 
 onMounted(async () => {
     document.title = loadingText.value + " - Smart YT Subscriptions";
@@ -87,14 +88,27 @@ onBeforeRouteLeave(async () => {
 
 async function getFolderVideos() {
     videos.value = [];
+    noAccess.value = false;
 
-    let response = await store.dispatch('getFolder', { folderId: route.params.folder });
-    folder.value = response.folder;
-    videos.value = response.videos;
-    checkPosition();
-    document.title = folder.value.name + " - Smart YT Subscriptions";
-    lastCall.value = new Date(folder.value.lastVideosAccess);
-    localStorage.setItem(route.params.folder, JSON.stringify({ "folder": folder.value, "videos": videos.value, "lastCall": lastCall.value }));
+    try {
+        let response = await store.dispatch('getFolder', { folderId: route.params.folder });
+        folder.value = response.folder;
+        videos.value = response.videos;
+        checkPosition();
+        document.title = folder.value.name + " - Smart YT Subscriptions";
+        lastCall.value = new Date(folder.value.lastVideosAccess);
+        localStorage.setItem(route.params.folder, JSON.stringify({ "folder": folder.value, "videos": videos.value, "lastCall": lastCall.value }));
+    } catch (error) {
+        if (error.response && error.response.status === 403) {
+            noAccess.value = true;
+            loadingText.value = "У вас нет доступа к данной папке";
+            loadingColor.value = "text-danger";
+        } else {
+            console.error('Error fetching folder:', error);
+            loadingText.value = "Произошла ошибка при загрузке папки";
+            loadingColor.value = "text-danger";
+        }
+    }
 }
 
 async function refreshFolderVideos() {

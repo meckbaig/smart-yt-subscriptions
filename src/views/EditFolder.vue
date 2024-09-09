@@ -107,6 +107,7 @@ window.addEventListener('resize', updateIconHeight);
 const loadingText = ref([])
 loadingText.value = "Загрузка..."
 const loadingColor = ref([])
+const noAccess = ref(false)
 
 
 onMounted(async () => {
@@ -122,8 +123,14 @@ onMounted(async () => {
         updateIconHeight();
     } catch (error) {
         console.error('Error:', error);
-        // loadingText.value = error.response.data.name;
-        // loadingColor.value = "text-danger";
+        if (error.response && error.response.status === 403) {
+            noAccess.value = true;
+            loadingText.value = "У вас нет доступа к редактированию данной папки";
+            loadingColor.value = "text-danger";
+        } else {
+            loadingText.value = "Произошла ошибка при загрузке папки";
+            loadingColor.value = "text-danger";
+        }
     }
 })
 
