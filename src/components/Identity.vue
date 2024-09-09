@@ -68,7 +68,7 @@ async function getSubscriptions() {
 
 async function execute(idValue, nextPageToken, totalResults) {
     if (nextPageToken == undefined) {
-        store.commit('setUserChannels', ""); // Updated to setUserChannels to reflect the relocation
+        store.commit('setUserChannels', []); // Updated to setUserChannels to reflect the relocation
     }
     googleAuth.executeNext(idValue, nextPageToken).then(async (data) => {
         if (data == undefined) {
@@ -94,7 +94,7 @@ async function execute(idValue, nextPageToken, totalResults) {
                 await execute(idValue, nextPageToken, totalResults)
             }
             else {
-                store.dispatch('updateSubChannels', { "id": store.state.user.id, "responseData": store.state.user.subChannels }) // Updated to reflect the relocation
+                store.dispatch('updateSubChannels', store.state.user.subChannels) // Updated to reflect the relocation
             }
         }
     })

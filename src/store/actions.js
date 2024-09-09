@@ -2,24 +2,25 @@ import * as connections from "../connections";
 import cookies from 'vue-cookies';
 import router from '../router'; // Added router import
 
-export function getConnectionState({ commit }) {
-    connections.axiosClient.get(`Auth/GetConnectionState`)
-        .then(({ data }) => {
-            commit('setConnectionStates', data)
-        })
-}
-export function updateSubChannels({ commit }, payload) {
-    connections.axiosClient.post(`User/UpdateSubChannels?id=${payload.id}`,
-        { "channels": payload.responseData })
-        .then(({ data }) => {
-            commit('setLastUpdated', data)
+export async function updateSubChannels({ commit, dispatch }, responseData) {
+    let delegate = async () => {
+        let token = cookies.get('token');
+        let headers = { 'Authorization': `Bearer ${token}` };
+        try {
+            const { data } = await connections.axiosClientV1.post(`Users/UpdateSubChannels`, { "channels": responseData }, { headers });
+            commit('setLastUpdated', data);
             let message = {
                 title: "Успех",
-                message: `Список каналов успешно обновлён. Найдено каналов: ${payload.responseData.length}`,
+                message: `Список каналов успешно обновлён. Найдено каналов: ${responseData.length}`,
                 style: "alert-success"
-            }
-            commit("addMessage", message)
-        });
+            };
+            commit("addMessage", message);
+        } catch (error) {
+            console.error('Failed to update sub channels:', error);
+            throw error;
+        }
+    };
+    await refreshTokenWrapper(delegate, { dispatch });
 }
 export async function updateFolder({ commit, dispatch }, payload) {
     let delegate = async () => {
