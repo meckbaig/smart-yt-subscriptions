@@ -26,7 +26,7 @@ export async function updateFolder({ commit, dispatch }, payload) {
         let token = cookies.get('token');
         let headers = { 'Authorization': `Bearer ${token}` };
         try {
-            const { data } = await connections.axiosClient.put(`/api/v1/Folders/${payload.folder.guid}`, payload, { headers });
+            const { data } = await connections.axiosClientV1.put(`Folders/${payload.folder.guid}`, payload, { headers });
             commit('setFolder', data.folder);
             return data.folder; 
         } catch (error) {
@@ -41,7 +41,7 @@ export async function createFolder({ commit, dispatch }, payload) {
         let token = cookies.get('token');
         let headers = { 'Authorization': `Bearer ${token}` };
         try {
-            const { data } = await connections.axiosClient.post(`/api/v1/Folders`, { name: payload.name }, { headers });
+            const { data } = await connections.axiosClientV1.post(`Folders`, { name: payload.name }, { headers });
             commit('addFolder', data.folder);
         } catch (error) {
             console.error('Failed to create folder:', error);
@@ -55,7 +55,7 @@ export async function deleteFolder({ commit, dispatch }, guid) {
         let token = cookies.get('token');
         let headers = { 'Authorization': `Bearer ${token}` };
         try {
-            await connections.axiosClient.delete(`/api/v1/Folders/${guid}`, { headers });
+            await connections.axiosClientV1.delete(`Folders/${guid}`, { headers });
             commit('removeFolder', guid);
         } catch (error) {
             console.error('Failed to delete folder:', error);
@@ -66,7 +66,7 @@ export async function deleteFolder({ commit, dispatch }, guid) {
 }
 export async function authorizeUser({ commit }, accessToken) {
     try {
-        const { data } = await connections.axiosClient.get(`/api/v1/Authorization?accessToken=${accessToken}`);
+        const { data } = await connections.axiosClientV1.get(`Authorization?accessToken=${accessToken}`);
         if (data && data.userData) {
             commit('setUser', data.userData);
             cookies.set('token', data.token, Infinity);
@@ -91,7 +91,7 @@ export async function updateYoutubeId({ commit, dispatch }, payload) {
         }
         let headers = { 'Authorization': `Bearer ${token}` };
         try {
-            await connections.axiosClient.post(`/api/v1/Users/UpdateYoutubeId`, { youtubeId: payload.youtubeId }, { headers });
+            await connections.axiosClientV1.post(`Users/UpdateYoutubeId`, { youtubeId: payload.youtubeId }, { headers });
 
             let message = {
                 title: "Успех",
@@ -115,7 +115,7 @@ export async function getFolders({ commit, dispatch }, userId) {
         let token = cookies.get('token');
         let headers = token ? { 'Authorization': `Bearer ${token}` } : {};
         try {
-            const { data } = await connections.axiosClient.get(`/api/v1/Folders`, { headers });
+            const { data } = await connections.axiosClientV1.get(`Folders`, { headers });
             commit('updateFolders', data);
         } catch (error) {
             console.error('Error fetching folders:', error);
@@ -130,7 +130,7 @@ export async function getFolder({ dispatch }, { folderId: folderGuid, info = fal
         let headers = token ? { 'Authorization': `Bearer ${token}` } : {};
         let params = info ? { info } : {};
         try {
-            const { data } = await connections.axiosClient.get(`/api/v1/Folders/${folderGuid}`, { headers, params });
+            const { data } = await connections.axiosClientV1.get(`Folders/${folderGuid}`, { headers, params });
             return data;
         } catch (error) {
             console.error('Error fetching folder:', error);
@@ -154,7 +154,7 @@ export async function refreshTokenWrapper(delegate, context) {
             return;
         }
         try {
-            const { data } = await connections.axiosClient.post(`/api/v1/Authorization/RefreshToken`,
+            const { data } = await connections.axiosClientV1.post(`Authorization/RefreshToken`,
                 { refreshToken: refreshToken },
                 { headers: { 'Authorization': `Bearer ${token}` } }
             );
