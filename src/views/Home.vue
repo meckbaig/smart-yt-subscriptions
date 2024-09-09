@@ -22,11 +22,11 @@
             <button @click="createFolder" class="btn btn-secondary">+ Добавить папку</button>
          </div>
          <div class="d-flex flex-row my-2 align-self-start flex-wrap gap-2">
-            <div v-if="loadingTextF != '' && folders.length == 0" class="h3 text-center"> {{ loadingTextF }}
-            </div>
-            <h3 v-else-if="folders.length == 0" class="w-100 text-center text-muted my-5">
+            <h3 v-if="loadingTextF == '' && folders.length == 0" class="w-100 text-center text-muted my-5">
                Вы не создали ни одной папки
             </h3>
+            <div v-else-if="folders.length == 0" class="h3 text-center"> {{ loadingTextF }}
+            </div>
             <folder-item 
                v-else 
                v-for="folder in folders" 
@@ -46,8 +46,16 @@
       <div class="d-flex flex-row my-2 align-self-start flex-wrap gap-2">
          <div v-if="loadingTextPF != '' && publicFolders.length == 0" class="h3 text-center"> {{ loadingTextPF }}
          </div>
-         <folder-item v-if="publicFolders.length" v-for="folder in publicFolders" :guid="folder.guid" :name="folder.name"
-            :color="folder.color" :icon="folder.icon" :channelsCount="folder.channelsCount" :editable="false"
+         <folder-item 
+            v-if="publicFolders.length" 
+            v-for="folder in publicFolders" 
+            :key="folder.guid" 
+            :guid="folder.guid" 
+            :name="folder.name"
+            :color="folder.color" 
+            :icon="folder.icon" 
+            :channelsCount="folder.channelsCount" 
+            :editable="false"
             style="max-width: 180px;" />
       </div>
    </div>
@@ -79,14 +87,6 @@ else if (route.query.s == true) {
 }
 
 onMounted(() => {
-   if (!store.state.publicFolders.length) {
-      loadingTextF.value = "Загрузка..."
-      let userId = ""
-      if (store.state.user.id) {
-         userId = store.state.user.id
-      }
-      store.dispatch("getFolders", userId)
-   }
    const unsubscribeSetChannels = store.subscribe(async (mutations, state) => {
       if (mutations.type == 'setChannels') {
          loadingTextF.value = ""
@@ -101,11 +101,20 @@ onMounted(() => {
       }
    })
    const unsubscribeSetPublicFolders = store.subscribe(async (mutations, state) => {
-      if (mutations.type == 'getFolders') {
+      if (mutations.type == 'updateFolders') {
+         loadingTextF.value = ""
          loadingTextPF.value = ""
          unsubscribeSetPublicFolders()
       }
    })
+   if (!store.state.publicFolders.length) {
+      loadingTextF.value = "Загрузка..."
+      let userId = ""
+      if (store.state.user.id) {
+         userId = store.state.user.id
+      }
+      store.dispatch("getFolders", userId)
+   }
 })
 
 async function createFolder() {
