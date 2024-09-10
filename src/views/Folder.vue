@@ -74,12 +74,17 @@ onMounted(async () => {
     //     getFolderVideos();
     // }
     // Set timer for refresh button
+    setRefreshTimeout() 
+})
+
+function setRefreshTimeout() {
+    refreshButtonLocked.value = true;
     let timeDiff = lastCall.value - Date.now();
 
     setTimeout(() => {
         refreshButtonLocked.value = false;
     }, timeDiff + 20000);
-})
+}
 
 onBeforeRouteLeave(async () => {
     document.title = "Smart YT Subscriptions";
@@ -123,9 +128,9 @@ function handleErrors(error) {
 }
 
 async function refreshFolderVideos() {
-    refreshButtonLocked.value = true;
-    await getFolderVideos();
-    location.reload();
+    await getFolderVideos(true);
+    setRefreshTimeout();
+    // location.reload();
 }
 
 async function checkPosition() {
