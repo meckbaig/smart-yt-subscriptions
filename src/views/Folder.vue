@@ -73,7 +73,7 @@ onMounted(async () => {
     // } else {
     //     getFolderVideos();
     // }
-    // Set timer for refresh button
+    // Set timer for refresh button 
     setRefreshTimeout() 
 })
 
@@ -90,19 +90,22 @@ onBeforeRouteLeave(async () => {
     document.title = "Smart YT Subscriptions";
 })
 
-async function getFolderVideos() {
+async function getFolderVideos(forceRefresh = false) {
     videos.value = [];
+    visibleVideos.value = []; // Reset visibleVideos
+    page = 0; // Reset page counter
     noAccess.value = false;
 
     try {
-        let response = await store.dispatch('getFolder', { folderId: route.params.folder });
+        let response = await store.dispatch('getFolder', { folderId: route.params.folder, forceRefresh: forceRefresh });
         folder.value = response.folder;
         videos.value = response.videos;
         if (videos.value.length == 0) {
             loadingText.value = "Папка пуста";
             loadingColor.value = "text-muted";
+        } else {
+            checkPosition(); // This will populate visibleVideos
         }
-        checkPosition();
         document.title = folder.value.name + " - Smart YT Subscriptions";
         lastCall.value = new Date(folder.value.lastVideosAccess);
         localStorage.setItem(route.params.folder, JSON.stringify({ "folder": folder.value, "videos": videos.value, "lastCall": lastCall.value }));

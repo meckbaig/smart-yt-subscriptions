@@ -125,11 +125,16 @@ export async function getFolders({ commit, dispatch }, userId) {
     };
     await refreshTokenWrapper(delegate, { commit, dispatch });
 }
-export async function getFolder({ commit, dispatch }, { folderId: folderGuid, info = false }) {
+export async function getFolder({ commit, dispatch }, { folderId: folderGuid, info = false, forceRefresh = false }) {
     let delegate = async () => {
         let token = cookies.get('token');
         let headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-        let params = info ? { info } : {};
+        let params = {};
+        if (info) 
+            params.info = info;
+        if (forceRefresh !== false) 
+            params.forceRefresh = forceRefresh;
+        
         try {
             const { data } = await connections.axiosClientV1.get(`Folders/${folderGuid}`, { headers, params });
             return data;
