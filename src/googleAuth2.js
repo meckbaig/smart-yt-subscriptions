@@ -21,7 +21,7 @@ export function executeNext(channelId, nextPageToken) {
     url.searchParams.append('channelId', channelId);
     url.searchParams.append('maxResults', '50');
     url.searchParams.append('prettyPrint', 'false');
-    url.searchParams.append('key', 'AIzaSyACfvSjO1vX30rZarzIzK3ajC_BCja7JYg');
+    url.searchParams.append('key', import.meta.env.VITE_GOOGLE_API_KEY);
     if (nextPageToken != undefined)
         url.searchParams.append('pageToken', nextPageToken);
     
@@ -34,7 +34,7 @@ export function getTitles(idsWithoutTitle) {
     const url = new URL('https://youtube.googleapis.com/youtube/v3/channels');
     url.searchParams.append('part', 'snippet');
     url.searchParams.append('id', idsWithoutTitle.join(','));
-    url.searchParams.append('key', 'AIzaSyACfvSjO1vX30rZarzIzK3ajC_BCja7JYg');
+    url.searchParams.append('key', import.meta.env.VITE_GOOGLE_API_KEY);
     
     return fetch(url)
         .then(response => response.json())

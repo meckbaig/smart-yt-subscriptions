@@ -81,15 +81,4 @@ function updateMainHeight() {
         - 15
     mainHeight.value = df
 }
-
-// function getSubs(){
-//     getChannelId();
-//     axios.create({
-//         baseURL: "https://www.googleapis.com/youtube/v3/",
-//     }).get(`subscriptions?mine=true&key=AIzaSyACfvSjO1vX30rZarzIzK3ajC_BCja7JYg`)
-//     .then(({ data }) => {
-//         console.log(data)
-//     })
-// }
-
 </script>
