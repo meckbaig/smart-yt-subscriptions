@@ -205,7 +205,13 @@ export async function refreshTokenWrapper(delegate, context) {
                 refreshError.response.data.errors.refreshToken[0].code === "RefreshTokenExpired")) {
                 console.error('Refresh token is not valid.');
                 await context.dispatch('logout');
-                await apiWrapper(context, delegate);
+                let message = {
+                    title: "Внимание",
+                    message: "Вы вышли из системы. Пожалуйста, авторизуйтесь снова.",
+                    style: "alert-warning"
+                };
+                context.commit("addMessage", message);
+                return;
             } else {
                 console.error('Error refreshing token:', refreshError);
             }
