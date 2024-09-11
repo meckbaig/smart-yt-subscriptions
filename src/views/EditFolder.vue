@@ -111,8 +111,7 @@ const noAccess = ref(false)
 
 onMounted(async () => {
     if (!store.state.user.youtubeId) {
-        loadingText.value = "У вас нет доступа к редактированию";
-        loadingColor.value = "text-danger";
+        showNoAccessError();
         return;
     }
     try {
@@ -120,7 +119,7 @@ onMounted(async () => {
         if (folderData) {
             folder.value = folderData;
         } else {
-            let data = await store.dispatch('getFolder', { folderId: route.params.folder, info: true });
+            let data = await store.dispatch('getFolder', { folderId: route.params.folder, toEdit: true });
             folder.value = data.folder;
         }
         updateListsHeight();
@@ -131,11 +130,15 @@ onMounted(async () => {
     }
 })
 
+function showNoAccessError() {
+    noAccess.value = true;
+    loadingText.value = "У вас нет доступа к редактированию данной папки";
+    loadingColor.value = "text-danger";
+}
+
 function handleErrors(error) {
     if (error.response && error.response.status === 403) {
-        noAccess.value = true;
-        loadingText.value = "У вас нет доступа к редактированию данной папки";
-        loadingColor.value = "text-danger";
+        showNoAccessError();
     } else if (error.response && error.response.status === 400 &&
         error.response.data.errors?.guid?.[0]?.code === "FolderDoesNotExist") {
         loadingText.value = "Указанная папка не существует";

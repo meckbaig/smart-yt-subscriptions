@@ -126,13 +126,13 @@ export async function getFolders({ commit, dispatch }, userId) {
     };
     await refreshTokenWrapper(delegate, { commit, dispatch });
 }
-export async function getFolder({ commit, dispatch }, { folderId: folderGuid, info = false, forceRefresh = false }) {
+export async function getFolder({ commit, dispatch }, { folderId: folderGuid, toEdit = false, forceRefresh = false }) {
     let delegate = async () => {
         let token = cookies.get('token');
         let headers = token ? { 'Authorization': `Bearer ${token}` } : {};
         let params = {};
-        if (info) 
-            params.info = info;
+        if (toEdit) 
+            params.toEdit = toEdit;
         if (forceRefresh !== false) 
             params.forceRefresh = forceRefresh;
         
