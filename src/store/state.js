@@ -1,5 +1,5 @@
 export default {
-    user: [],
+    user: {},
     folders: [],
     publicFolders: [],
     lastUpdated: [],

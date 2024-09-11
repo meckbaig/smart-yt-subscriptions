@@ -70,7 +70,6 @@ function updateThumbnailDpi() {
     thumbnailDpi.value = `https://i.ytimg.com/vi/${props.id}/${thumbnails.value[index].url}`
 }
 
-
 const props = defineProps({
     id: String,
     title: String,
@@ -87,13 +86,16 @@ const props = defineProps({
 const url = computed(() => {
     return 'https://www.youtube.com/watch?v=' + props.id
 })
+
 const channelUrl = computed(() => {
     return 'https://www.youtube.com/channel/' + props.channelId
 })
+
 const dateString = computed(() => {
     return new Date(props.publishedAt).toLocaleTimeString()
         + " " + new Date(props.publishedAt).toLocaleDateString()
 })
+
 const viewCountString = computed(() => {
     if (props.viewCount == "") {
         return "Прямая трансляция"
@@ -105,7 +107,6 @@ const viewCountString = computed(() => {
 })
 
 const wordingsViews = ["просмотр", "просмотра", "просмотров" ];
-
 </script>
 
 <style scoped>
@@ -133,7 +134,3 @@ const wordingsViews = ["просмотр", "просмотра", "просмот
     -webkit-box-orient: vertical;
 }
 </style>
-
-
-
-

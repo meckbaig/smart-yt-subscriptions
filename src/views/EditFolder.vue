@@ -6,13 +6,12 @@
                 v-bind:style="'overflow-y: scroll; max-height: ' + channelsListHeight + 'px'">
                 <draggable v-model="channels" delay="200" :delay-on-touch-only="true" :group="{
                     name: 'channels',
-                    // , pull: 'clone', put: false 
                 }" item-key="id" style="min-height: 200px; min-width: 200px">
                     <template #item="{ element: item, index: index }">
                         <div v-if="containsSearch(item.title)" class="d-flex flex-row justify-content-between">
                             <ChannelItem :title="item.title" :id="item.channelId" :thumbnailUrl="item.thumbnailUrl" />
-                            <a class="m-auto me-2 btn btn-outline-secondary p-0 border border-0" @click="toFolder(index)"
-                                style="cursor: pointer;">
+                            <a class="m-auto me-2 btn btn-outline-secondary p-0 border border-0"
+                                @click="toFolder(index)" style="cursor: pointer;">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor"
                                     class="bi bi-arrow-right-square" viewBox="0 0 16 16">
                                     <path fill-rule="evenodd"
@@ -31,7 +30,8 @@
                 <draggable v-model="folder.subChannels" group="channels" item-key="id" :animation="300"
                     style="min-height: 200px; min-width: 200px" delay="200" :delay-on-touch-only="true">
                     <template #item="{ element: item, index: index }">
-                        <div @mousemove="onChange(index)" class="d-flex border border-1 border-secondary-subtle rounded-2">
+                        <div @mousemove="onChange(index)"
+                            class="d-flex border border-1 border-secondary-subtle rounded-2">
                             <ChannelItem :title="item.title" :id="item.channelId" :thumbnailUrl="item.thumbnailUrl" />
                             <button class="btn btn-close ms-auto p-2" @click="removeAt(index)"></button>
                         </div>
@@ -51,7 +51,8 @@
                     <div class="d-flex gap-2 flex-wrap">
                         <div class="input-group p-0" style="min-width: 190px;">
                             <label class="input-group-text">Доступ</label>
-                            <select v-model="folder.access.id" class="form-select pe-2" @change="updateAccessName($event.target.value)">
+                            <select v-model="folder.access.id" class="form-select pe-2"
+                                @change="updateAccessName($event.target.value)">
                                 <option v-for="level in store.state.accessLevels" :value="level.id">
                                     {{ level.title }}
                                 </option>
@@ -82,12 +83,10 @@
         {{ loadingText }}
     </div>
 </template>
-  
+
 <script setup>
-import { sleep } from "../main";
 import ChannelItem from '../components/ChannelItem.vue'
 import draggable from 'vuedraggable';
-import * as connections from "../connections";
 import * as dateParser from "../dateParser";
 import { useRoute } from 'vue-router';
 import { computed, onMounted, ref } from 'vue'
@@ -137,8 +136,8 @@ function handleErrors(error) {
         noAccess.value = true;
         loadingText.value = "У вас нет доступа к редактированию данной папки";
         loadingColor.value = "text-danger";
-    } else if (error.response && error.response.status === 400 && 
-               error.response.data.errors?.guid?.[0]?.code === "FolderDoesNotExist") {
+    } else if (error.response && error.response.status === 400 &&
+        error.response.data.errors?.guid?.[0]?.code === "FolderDoesNotExist") {
         loadingText.value = "Указанная папка не существует";
         loadingColor.value = "text-danger";
     } else {
@@ -176,16 +175,6 @@ function filteredChannels() {
     else return store.state.user.subChannels
 }
 
-async function excludeSimilarVideos() {
-    while (channels.value.length == 0) {
-        channels.value = store.state.user.subChannels;
-        if (channels.value.length != 0) {
-            channels.value = channels.value.filter((item) => folder.value.subChannels.filter(i => i.id == item.id).length == 0);
-        }
-        else { await sleep(100); }
-    }
-}
-
 function addIcon(event) {
     let file = event.target.files[0];
     let reader = new FileReader();
@@ -194,12 +183,12 @@ function addIcon(event) {
         let canvas = document.createElement('canvas');
         i.onload = function () {
             let sizes = store.state.folderImageSize;
-            if (i.width > i.height && i.width > sizes[1]*2){
-                canvas.width = sizes[1]*2;
+            if (i.width > i.height && i.width > sizes[1] * 2) {
+                canvas.width = sizes[1] * 2;
                 canvas.height = Math.floor(canvas.width / i.width * i.height);
             }
-            else if (i.width < i.height && i.height > sizes[0]*2) {
-                canvas.height = sizes[0]*2;
+            else if (i.width < i.height && i.height > sizes[0] * 2) {
+                canvas.height = sizes[0] * 2;
                 canvas.width = Math.floor(canvas.height / i.height * i.width);
             }
             else {
@@ -224,7 +213,7 @@ async function saveChanges() {
 }
 
 function deleteFolder() {
-    store.dispatch("deleteFolder", route.params.folder );
+    store.dispatch("deleteFolder", route.params.folder);
     router.push({
         name: "home"
     })
@@ -270,14 +259,9 @@ function updateListsHeight() {
 
 function toFolder(index) {
     folder.value.subChannels = channels.value.splice(index, 1).concat(folder.value.subChannels)
-    //this.folder.subChannels = this.folder.subChannels.append(this.channels[index]);
-    // if (this.folder.subChannels[this.folder.subChannels.length-1] == ""){
-    //     this.folder.subChannels.pop();
-    // }    
 }
 
 function removeAt(index) {
-    //this.channels = this.folder.subChannels.splice(index, 1).concat(this.channels)
     folder.value.subChannels.splice(index, 1)
 }
 

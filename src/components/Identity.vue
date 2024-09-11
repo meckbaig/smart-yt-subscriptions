@@ -45,90 +45,17 @@
 </template>
 
 <script setup>
-import * as connections from "../connections";
-import * as googleAuth from '../googleAuth2'
 import cookies from 'vue-cookies'
-import axios from 'axios'
 import store from '../store'
 import { googleTokenLogin } from 'vue3-google-login'
 import { computed, onMounted } from 'vue'
-import { changeTheme, isLightTheme, reverseTheme, sleep } from "../main";
+import { changeTheme, isLightTheme, reverseTheme } from "../main";
 
 const curUser = computed(() => store.state.user)
-const channels = computed(() => store.state.user.subChannels); // Relocated from state.channels to state.user.subChannels
+const channels = computed(() => store.state.user.subChannels);
 
 async function getSubscriptions() {
     store.dispatch('updateSubChannels');
-}
-
-async function execute(idValue, nextPageToken, totalResults) {
-    if (nextPageToken == undefined) {
-        store.commit('setUserChannels', []); // Updated to setUserChannels to reflect the relocation
-    }
-    googleAuth.executeNext(idValue, nextPageToken).then(async (data) => {
-        if (data == undefined) {
-            let message = {
-                message: "Не выполнены условия. Проверьте ссылку на свой профиль и доступ к подпискам",
-                style: "alert-danger"
-            }
-            store.commit("addMessage", message)
-        }
-        else {
-            let jsonData = data;
-            await checkChannelsForTitles(jsonData)
-
-            if (channels.value.length == 0) {
-                store.commit('setUserChannels', cutSubChannels(jsonData.items)); // Updated to setUserChannels to reflect the relocation
-                totalResults = jsonData.pageInfo.totalResults;
-            }
-            else {
-                store.commit('concatUserChannels', cutSubChannels(jsonData.items)); // Updated to concatUserChannels to reflect the relocation
-            }
-            nextPageToken = jsonData.nextPageToken;
-            if ((totalResults - channels.value.length > 0 && totalResults > 50) && nextPageToken != undefined) {
-                await execute(idValue, nextPageToken, totalResults)
-            }
-            else {
-                store.dispatch('updateSubChannels', store.state.user.subChannels) // Updated to reflect the relocation
-            }
-        }
-    })
-}
-
-async function checkChannelsForTitles(channels) {
-    let idsWithoutTitle = [];
-    channels.items.forEach(item => {
-        if (item.snippet.title == undefined) {
-            idsWithoutTitle.push(item.snippet.resourceId.channelId);
-        }
-    });
-    if (idsWithoutTitle.length != 0) {
-        let channelsWithTitles = await googleAuth.getTitles(idsWithoutTitle)
-        let titleMap = {};
-        channelsWithTitles.items.forEach(item => {
-            titleMap[item.id] = item.snippet.title;
-        });
-        channels.items.forEach(channel => {
-            if (titleMap.hasOwnProperty(channel.snippet.resourceId.channelId)) {
-                channel.snippet.title = titleMap[channel.snippet.resourceId.channelId];
-            }
-        });
-    }
-    return channels;
-
-}
-
-function cutSubChannels(items) {
-    let result = [];
-    items.forEach(item => {
-        let newItem = {
-            channelId: item.snippet.resourceId.channelId,
-            title: item.snippet.title,
-            thumbnailUrl: item.snippet.thumbnails.default.url
-        }
-        result.push(newItem)
-    });
-    return result;
 }
 
 onMounted(async () => {
@@ -144,7 +71,6 @@ async function loadUser() {
     let user = localStorage.getItem('user')
     if (user != null) {
         store.commit('setUser', JSON.parse(user))
-        //1000×60×60×24=86_400_000
         if (Date.now() - localStorage.getItem("lastLogin") > 86_400_000) {
             localStorage.clear()
             localStorage.setItem("lastLogin", Date.now())

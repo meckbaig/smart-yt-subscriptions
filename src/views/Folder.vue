@@ -21,7 +21,7 @@
         </div>
         <div v-if="videos.length > 0"
             class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 row-cols-xxl-6">
-            <Video v-for="video in visibleVideos" :id="video.id" :title="video.title" :simpleLength="video.simpleLength"
+            <Video v-for="video in visibleVideos" :key="video.id" :id="video.id" :title="video.title" :simpleLength="video.simpleLength"
                 :viewCount="video.viewCount" :publishedAt="video.publishedAt" :channelId="video.channelId"
                 :channelTitle="video.channelTitle" :channelThumbnail="video.channelThumbnail"
                 :maxThumbnail="video.maxThumbnail" :isNew="video.isNew"></Video>
@@ -49,11 +49,11 @@ const lastCallString = computed(() => {
 })
 const visibleVideos = ref([])
 const videos = ref([])
-const folder = ref([])
+const folder = ref({})
 const route = useRoute();
 const loadingText = ref("Загрузка...")
-const loadingColor = ref([])
-const lastCall = ref([])
+const loadingColor = ref('')
+const lastCall = ref(0)
 const refreshButtonLocked = ref(true)
 const noAccess = ref(false)
 
@@ -63,17 +63,6 @@ onMounted(async () => {
     window.addEventListener('resize', checkPosition);
 
     await getFolderVideos();
-    // let localStorageFolderData = JSON.parse(localStorage.getItem(route.params.folder));
-    // //1000ms*60s*30m=1_800_000ms
-    // if (localStorageFolderData && (Date.now() - localStorageFolderData.lastCall) < 1_800_000) {
-    //     lastCall.value = localStorageFolderData.lastCall;
-    //     folder.value = localStorageFolderData.folder;
-    //     videos.value = localStorageFolderData.vides;
-    //     checkPosition();
-    // } else {
-    //     getFolderVideos();
-    // }
-    // Set timer for refresh button 
     setRefreshTimeout() 
 })
 
@@ -92,8 +81,8 @@ onBeforeRouteLeave(async () => {
 
 async function getFolderVideos(forceRefresh = false) {
     videos.value = [];
-    visibleVideos.value = []; // Reset visibleVideos
-    page = 0; // Reset page counter
+    visibleVideos.value = []; 
+    page = 0; 
     noAccess.value = false;
 
     try {
@@ -104,7 +93,7 @@ async function getFolderVideos(forceRefresh = false) {
             loadingText.value = "Папка пуста";
             loadingColor.value = "text-muted";
         } else {
-            checkPosition(); // This will populate visibleVideos
+            checkPosition();
         }
         document.title = folder.value.name + " - Smart YT Subscriptions";
         lastCall.value = new Date(folder.value.lastVideosAccess);
@@ -133,7 +122,6 @@ function handleErrors(error) {
 async function refreshFolderVideos() {
     await getFolderVideos(true);
     setRefreshTimeout();
-    // location.reload();
 }
 
 async function checkPosition() {

@@ -153,8 +153,6 @@ export async function apiWrapper({ commit }, apiCall) {
         return result;
     } catch (error) {
         if (error.response) {
-            // The request was made and the server responded with a status code
-            // that falls out of the range of 2xx
             if (error.response.data.errors && 
                 error.response.data.errors.Undefined && 
                 error.response.data.errors.Undefined[0].code === "DatabaseException") {
@@ -162,11 +160,7 @@ export async function apiWrapper({ commit }, apiCall) {
             } else {
                 commit('setConnectionStates', { backend: true, database: true });
             }
-        } else if (error.request) {
-            // The request was made but no response was received
-            commit('setConnectionStates', { backend: false, database: false });
         } else {
-            // Something happened in setting up the request that triggered an Error
             commit('setConnectionStates', { backend: false, database: false });
         }
         throw error;
@@ -226,6 +220,5 @@ export async function logout({ commit }) {
     cookies.remove('token');
     cookies.remove('refreshToken');
     localStorage.clear();
-    // Redirect to home page
-    router.push({ name: 'home' }); // Using router to redirect
+    router.push({ name: 'home' });
 }
