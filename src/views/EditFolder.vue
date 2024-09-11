@@ -65,7 +65,7 @@
                             <input type="file" id="uploadIcon" accept="image/*" @change="addIcon" hidden />
                         </label>
                     </div>
-                    <img class="rounded rounded-1 align-self-start" title="Удалить иконку" @click="folder.icon = ''"
+                    <img v-if="folder.icon != null" class="rounded rounded-1 align-self-start" title="Удалить иконку" @click="folder.icon = null"
                         v-bind:style="'max-height: ' + iconHeight + 'px;cursor:pointer'" :src="folder.icon" />
                     <div class="d-flex flex-column ms-auto gap-2 mb-auto" id="submitButtons">
                         <button @click="saveChanges" class="btn btn-success">Сохранить</button>
@@ -100,8 +100,7 @@ const folder = ref([])
 const channelsListHeight = ref('')
 const folderListHeight = ref('')
 window.addEventListener('resize', updateListsHeight);
-const iconHeight = ref('')
-iconHeight.value = 1;
+const iconHeight = ref(84)
 window.addEventListener('resize', updateIconHeight);
 const loadingText = ref([])
 loadingText.value = "Загрузка..."
@@ -165,9 +164,9 @@ function updateIconHeight() {
     if (document.getElementById("submitButtons")) {
         iconHeight.value = document.getElementById("submitButtons").clientHeight
     }
-    else {
-        window.removeEventListener("resize", updateIconHeight)
-    }
+    // else {
+    //     window.removeEventListener("resize", updateIconHeight)
+    // }
 }
 
 function filteredChannels() {
