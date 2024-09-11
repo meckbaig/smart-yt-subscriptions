@@ -14,6 +14,7 @@ export function setUserYoutubeId(state, youtubeId){
 }
 export function setUserChannels(state, channels){
   state.user.subChannels = channels || []
+  localStorage.setItem('user', JSON.stringify(state.user));
 }
 export function concatUserChannels(state, channels){
   state.user.subChannels = state.user.subChannels.concat(channels) || state.user.subChannels
