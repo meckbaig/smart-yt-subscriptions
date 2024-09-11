@@ -111,6 +111,11 @@ const noAccess = ref(false)
 
 
 onMounted(async () => {
+    if (!store.state.user.youtubeId) {
+        loadingText.value = "У вас нет доступа к редактированию";
+        loadingColor.value = "text-danger";
+        return;
+    }
     try {
         let folderData = store.state.folders.find(folder => folder.guid === route.params.folder);
         if (folderData) {
