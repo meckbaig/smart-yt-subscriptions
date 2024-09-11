@@ -58,12 +58,7 @@ const curUser = computed(() => store.state.user)
 const channels = computed(() => store.state.user.subChannels); // Relocated from state.channels to state.user.subChannels
 
 async function getSubscriptions() {
-    let message = {
-        message: "Начато обновление списка каналов",
-        style: "alert-success"
-    }
-    store.commit("addMessage", message)
-    await execute(store.state.user.youtubeId);
+    store.dispatch('updateSubChannels');
 }
 
 async function execute(idValue, nextPageToken, totalResults) {

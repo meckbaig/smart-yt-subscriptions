@@ -7,11 +7,12 @@ export async function updateSubChannels({ commit, dispatch }, responseData) {
         let token = cookies.get('token');
         let headers = { 'Authorization': `Bearer ${token}` };
         try {
-            const { data } = await connections.axiosClientV1.post(`Users/UpdateSubChannels`, { "channels": responseData }, { headers });
-            commit('setLastUpdated', data);
+            const { data } = await connections.axiosClient.post(`v1.1/Users/UpdateSubChannels`, null, { headers });
+            commit('setLastUpdated', data.lastChannelsUpdate);
+            commit('setUserChannels', data.subChannels);
             let message = {
                 title: "Успех",
-                message: `Список каналов успешно обновлён. Найдено каналов: ${responseData.length}`,
+                message: `Список каналов успешно обновлён. Найдено каналов: ${data.subChannels.length}`,
                 style: "alert-success"
             };
             commit("addMessage", message);
