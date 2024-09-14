@@ -270,12 +270,12 @@ function removeAt(index) {
 let containsSearch = (title) => title.toLowerCase().includes(search.value.toLowerCase())
 
 const getLastUpdateTitle = computed(() => {
-    return folder.value.lastChannelsUpdate ? new Date(folder.value.lastChannelsUpdate).toLocaleString() : '';
+    return folder.value.lastModified ? new Date(folder.value.lastModified).toLocaleString() : '';
 })
 
 const getFormattedLastUpdate = computed(() => {
     return "Последнее обновление: " + dateParser.formatToRelative(
-        folder.value.lastChannelsUpdate ? new Date(folder.value.lastChannelsUpdate) : null);
+        folder.value.lastModified ? new Date(folder.value.lastModified) : null);
 })
 
 function updateAccessName(selectedId) {

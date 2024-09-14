@@ -8,7 +8,7 @@ export async function updateSubChannels({ commit, dispatch }, responseData) {
         let headers = { 'Authorization': `Bearer ${token}` };
         try {
             const { data } = await connections.axiosClient.put(`v1.1/Users/UpdateSubChannels`, null, { headers });
-            commit('setLastUpdated', data.lastChannelsUpdate);
+            commit('setLastUpdated', data.lastModified);
             commit('setUserChannels', data.subChannels);
             let message = {
                 title: "Успех",
