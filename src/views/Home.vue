@@ -87,6 +87,9 @@ else if (route.query.s == true) {
 }
 
 onMounted(() => {
+   if (Object.keys(route.query).length > 0) {
+      return;
+   }
    const unsubscribeSetChannels = store.subscribe(async (mutations, state) => {
       if (mutations.type == 'setChannels') {
          loadingTextF.value = ""
