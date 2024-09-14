@@ -1,10 +1,10 @@
 <template>
-    <router-link :to="{ name: 'folder', params: { folder: id } }"  v-bind:style="contrastColor(color)+'background-color:'+bgColor"
+    <router-link :to="{ name: 'folder', params: { folder: guid } }"  v-bind:style="contrastColor(color)+'background-color:'+bgColor"
         v-bind:class="'d-flex flex-column position-relative rounded rounded-3 flex-fill border-'+borderThicness()+
         ' btn btn-outline-' + reverseTheme" @mouseover="bgColor = hoverColor(color)" @mouseleave="bgColor = color">
         <p class="text-start px-0 text-truncate w-100" style="margin-right: 40px;">{{ name }}</p>
         <router-link v-if="editable" class="top-0 end-0 to-show position-absolute p-0" style="margin:6px;width:28px;height:28px"
-            :to="{ name: 'editFolder', params: { folder: id } }">
+            :to="{ name: 'editFolder', params: { folder: guid } }">
             <div class="position-relative btn btn-dark opacity-75 rounded-circle w-100 h-100 m-0">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" fill="white"
                     class="bi bi-pencil position-absolute top-50 start-50 translate-middle m-0" viewBox="0 0 16 16">
@@ -27,11 +27,11 @@ import { ref } from 'vue'
 import { contrastColor, hoverColor, reverseTheme } from "../main";
 
 const props = defineProps({
-    id: String,
+    guid: String,
     name: String,
     color: String,
     icon: String,
-    channelsCount: String,
+    channelsCount: Number,
     editable: Boolean
 })
 

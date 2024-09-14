@@ -1,18 +1,17 @@
 <template>
-    <div v-if="folder.id" class="row align-self-start p-2 m-2 gap-2">
+    <div v-if="folder.guid" class="row align-self-start p-2 m-2 gap-2">
         <span class="col px-0">
             <input v-model="search" class="form-control mb-2" placeholder="Поиск" />
             <div class="border border-1 border-secondary rounded-2"
                 v-bind:style="'overflow-y: scroll; max-height: ' + channelsListHeight + 'px'">
                 <draggable v-model="channels" delay="200" :delay-on-touch-only="true" :group="{
                     name: 'channels',
-                    // , pull: 'clone', put: false 
                 }" item-key="id" style="min-height: 200px; min-width: 200px">
                     <template #item="{ element: item, index: index }">
                         <div v-if="containsSearch(item.title)" class="d-flex flex-row justify-content-between">
                             <ChannelItem :title="item.title" :id="item.channelId" :thumbnailUrl="item.thumbnailUrl" />
-                            <a class="m-auto me-2 btn btn-outline-secondary p-0 border border-0" @click="toFolder(index)"
-                                style="cursor: pointer;">
+                            <a class="m-auto me-2 btn btn-outline-secondary p-0 border border-0"
+                                @click="toFolder(index)" style="cursor: pointer;">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor"
                                     class="bi bi-arrow-right-square" viewBox="0 0 16 16">
                                     <path fill-rule="evenodd"
@@ -28,10 +27,11 @@
             <input v-model="folder.name" class="form-control mb-2" maxlength="50" />
             <div class="border border-1 align-self-start border-secondary rounded-2 mb-1 w-100"
                 v-bind:style="'overflow-y: scroll; max-height: ' + folderListHeight + 'px'">
-                <draggable v-model="folder.subChannelsJson" group="channels" item-key="id" :animation="300"
+                <draggable v-model="folder.subChannels" group="channels" item-key="id" :animation="300"
                     style="min-height: 200px; min-width: 200px" delay="200" :delay-on-touch-only="true">
                     <template #item="{ element: item, index: index }">
-                        <div @mousemove="onChange(index)" class="d-flex border border-1 border-secondary-subtle rounded-2">
+                        <div @mousemove="onChange(index)"
+                            class="d-flex border border-1 border-secondary-subtle rounded-2">
                             <ChannelItem :title="item.title" :id="item.channelId" :thumbnailUrl="item.thumbnailUrl" />
                             <button class="btn btn-close ms-auto p-2" @click="removeAt(index)"></button>
                         </div>
@@ -51,9 +51,11 @@
                     <div class="d-flex gap-2 flex-wrap">
                         <div class="input-group p-0" style="min-width: 190px;">
                             <label class="input-group-text">Доступ</label>
-                            <select v-model="folder.accessId" class="form-select pe-2">
+                            <select v-model="folder.access.id" class="form-select pe-2"
+                                @change="updateAccessName($event.target.value)">
                                 <option v-for="level in store.state.accessLevels" :value="level.id">
-                                    {{ level.title }}</option>
+                                    {{ level.title }}
+                                </option>
                             </select>
                         </div>
                         <input v-model="folder.color" type="color" class="h-auto flex-fill" id="colorInput"
@@ -63,7 +65,7 @@
                             <input type="file" id="uploadIcon" accept="image/*" @change="addIcon" hidden />
                         </label>
                     </div>
-                    <img class="rounded rounded-1 align-self-start" title="Удалить иконку" @click="folder.icon = ''"
+                    <img v-if="folder.icon != null" class="rounded rounded-1 align-self-start" title="Удалить иконку" @click="folder.icon = null"
                         v-bind:style="'max-height: ' + iconHeight + 'px;cursor:pointer'" :src="folder.icon" />
                     <div class="d-flex flex-column ms-auto gap-2 mb-auto" id="submitButtons">
                         <button @click="saveChanges" class="btn btn-success">Сохранить</button>
@@ -71,8 +73,8 @@
                     </div>
                 </div>
                 <button @click="print">print</button>
-                <p class="mb-2 opacity-50" @click="print()" v-bind:title="new Date(folder.lastChannelsUpdate).toLocaleString()">
-                    Последнее обновление: {{ dateParser.formatToRelative(new Date(folder.lastChannelsUpdate)) }}
+                <p class="mb-2 opacity-50" @click="print()" v-bind:title="getLastUpdateTitle">
+                    {{ getFormattedLastUpdate }}
                 </p>
             </span>
         </span>
@@ -81,12 +83,10 @@
         {{ loadingText }}
     </div>
 </template>
-  
+
 <script setup>
-import { sleep } from "../main";
 import ChannelItem from '../components/ChannelItem.vue'
 import draggable from 'vuedraggable';
-import * as connections from "../connections";
 import * as dateParser from "../dateParser";
 import { useRoute } from 'vue-router';
 import { computed, onMounted, ref } from 'vue'
@@ -100,38 +100,53 @@ const folder = ref([])
 const channelsListHeight = ref('')
 const folderListHeight = ref('')
 window.addEventListener('resize', updateListsHeight);
-const iconHeight = ref('')
-iconHeight.value = 1;
+const iconHeight = ref(84)
 window.addEventListener('resize', updateIconHeight);
 const loadingText = ref([])
 loadingText.value = "Загрузка..."
 const loadingColor = ref([])
+const noAccess = ref(false)
 
 
 onMounted(async () => {
-    connections.axiosClient.get(`Folder/Get?id=${route.params.folder}&userId=${store.state.user.id}&edit=true`)
-        .then(async ({ data }) => {
-            folder.value = data;
-            if (folder.value.subChannelsJson == "") {
-                folder.value.subChannelsJson = []
-            }
-            await sleep(100)
-            updateListsHeight()
-            updateIconHeight()
-        })
-        .catch(function (error) {
-            loadingText.value = error.response.data.title;
-            loadingColor.value = "text-danger";
-        });
-    //     const unsubscribe = store.subscribe(async (mutations, state) => {
-    //     if (mutations.type == 'setChannels') {
-    //         await sleep(100);
-    //         channels.value = state.channels.filter((item) =>
-    //             folder.value.subChannelsJson.filter(i => i.id == item.id).length == 0)
-    //         unsubscribe()
-    //     }
-    // })
+    if (!store.state.user.youtubeId) {
+        showNoAccessError();
+        return;
+    }
+    try {
+        let folderData = store.state.folders.find(folder => folder.guid === route.params.folder);
+        if (folderData) {
+            folder.value = folderData;
+        } else {
+            let data = await store.dispatch('getFolder', { folderId: route.params.folder, toEdit: true });
+            folder.value = data.folder;
+        }
+        updateListsHeight();
+        updateIconHeight();
+    } catch (error) {
+        console.error('Error:', error);
+        handleErrors(error);
+    }
 })
+
+function showNoAccessError() {
+    noAccess.value = true;
+    loadingText.value = "У вас нет доступа к редактированию данной папки";
+    loadingColor.value = "text-danger";
+}
+
+function handleErrors(error) {
+    if (error.response && error.response.status === 403) {
+        showNoAccessError();
+    } else if (error.response && error.response.status === 400 &&
+        error.response.data.errors?.guid?.[0]?.code === "FolderDoesNotExist") {
+        loadingText.value = "Указанная папка не существует";
+        loadingColor.value = "text-danger";
+    } else {
+        loadingText.value = "Произошла ошибка при загрузке папки";
+        loadingColor.value = "text-danger";
+    }
+}
 
 function ytFolderCheckedChanged(ytFolderName) {
     if (folder.value.youtubeFolders.includes(ytFolderName)) {
@@ -149,27 +164,17 @@ function updateIconHeight() {
     if (document.getElementById("submitButtons")) {
         iconHeight.value = document.getElementById("submitButtons").clientHeight
     }
-    else {
-        window.removeEventListener("resize", updateIconHeight)
-    }
+    // else {
+    //     window.removeEventListener("resize", updateIconHeight)
+    // }
 }
 
 function filteredChannels() {
-    if (folder.value.subChannelsJson != undefined && folder.value.subChannelsJson != "") {
-        return store.state.channels.filter((item) =>
-            folder.value.subChannelsJson.filter(i => i.channelId == item.channelId).length == 0)
+    if (folder.value.subChannels != undefined && folder.value.subChannels != "") {
+        return store.state.user.subChannels.filter((item) =>
+            folder.value.subChannels.filter(i => i.channelId == item.channelId).length == 0)
     }
-    else return store.state.channels
-}
-
-async function excludeSimilarVideos() {
-    while (channels.value.length == 0) {
-        channels.value = store.state.channels;
-        if (channels.value.length != 0) {
-            channels.value = channels.value.filter((item) => folder.value.subChannelsJson.filter(i => i.id == item.id).length == 0);
-        }
-        else { await sleep(100); }
-    }
+    else return store.state.user.subChannels
 }
 
 function addIcon(event) {
@@ -180,12 +185,12 @@ function addIcon(event) {
         let canvas = document.createElement('canvas');
         i.onload = function () {
             let sizes = store.state.folderImageSize;
-            if (i.width > i.height && i.width > sizes[1]*2){
-                canvas.width = sizes[1]*2;
+            if (i.width > i.height && i.width > sizes[1] * 2) {
+                canvas.width = sizes[1] * 2;
                 canvas.height = Math.floor(canvas.width / i.width * i.height);
             }
-            else if (i.width < i.height && i.height > sizes[0]*2) {
-                canvas.height = sizes[0]*2;
+            else if (i.width < i.height && i.height > sizes[0] * 2) {
+                canvas.height = sizes[0] * 2;
                 canvas.width = Math.floor(canvas.height / i.height * i.width);
             }
             else {
@@ -201,41 +206,38 @@ function addIcon(event) {
     reader.readAsDataURL(file);
 }
 
-function saveChanges() {
-    folder.value.channelsCount = folder.value.subChannelsJson.length;
-    connections.axiosClient.post(`Folder/Update`, folder.value)
-        .then((response) => {
-            folder.value.lastChannelsUpdate = response.data.lastChannelsUpdate;
-            console.log(response);
-            store.commit('setFolder', response.data)
-        })
+async function saveChanges() {
+    folder.value.channelsCount = folder.value.subChannels.length;
+    let folderData = await store.dispatch('updateFolder', { folder: folder.value });
+    if (folderData) {
+        folder.value = folderData;
+    }
 }
 
 function deleteFolder() {
-    store.dispatch("deleteFolder", { "id": route.params.folder, "userId": store.state.user.id });
+    store.dispatch("deleteFolder", route.params.folder);
     router.push({
         name: "home"
     })
 }
 
 function print() {
-    folder.value.channelsCount = folder.value.subChannelsJson.length;
-    console.log(JSON.stringify(folder.value));
+    console.log(folder.value);
 }
 
 function onChange(index) {
-    for (let i = 0; i < folder.value.subChannelsJson.length; i++) {
-        if (i != index && folder.value.subChannelsJson[i].channelId == folder.value.subChannelsJson[index].channelId) {
-            folder.value.subChannelsJson.splice(index, 1);
+    for (let i = 0; i < folder.value.subChannels.length; i++) {
+        if (i != index && folder.value.subChannels[i].channelId == folder.value.subChannels[index].channelId) {
+            folder.value.subChannels.splice(index, 1);
             index = index - 1
             break;
         }
     }
     index = index + 1
-    if (folder.value.subChannelsJson.length > index) {
-        for (let i = 0; i < folder.value.subChannelsJson.length; i++) {
-            if (i != index && folder.value.subChannelsJson[i].channelId == folder.value.subChannelsJson[index].channelId) {
-                folder.value.subChannelsJson.splice(index, 1);
+    if (folder.value.subChannels.length > index) {
+        for (let i = 0; i < folder.value.subChannels.length; i++) {
+            if (i != index && folder.value.subChannels[i].channelId == folder.value.subChannels[index].channelId) {
+                folder.value.subChannels.splice(index, 1);
                 break;
             }
         }
@@ -258,18 +260,28 @@ function updateListsHeight() {
 }
 
 function toFolder(index) {
-    folder.value.subChannelsJson = channels.value.splice(index, 1).concat(folder.value.subChannelsJson)
-    //this.folder.subChannelsJson = this.folder.subChannelsJson.append(this.channels[index]);
-    // if (this.folder.subChannelsJson[this.folder.subChannelsJson.length-1] == ""){
-    //     this.folder.subChannelsJson.pop();
-    // }    
+    folder.value.subChannels = channels.value.splice(index, 1).concat(folder.value.subChannels)
 }
 
 function removeAt(index) {
-    //this.channels = this.folder.subChannelsJson.splice(index, 1).concat(this.channels)
-    folder.value.subChannelsJson.splice(index, 1)
+    folder.value.subChannels.splice(index, 1)
 }
 
 let containsSearch = (title) => title.toLowerCase().includes(search.value.toLowerCase())
 
+const getLastUpdateTitle = computed(() => {
+    return folder.value.lastChannelsUpdate ? new Date(folder.value.lastChannelsUpdate).toLocaleString() : '';
+})
+
+const getFormattedLastUpdate = computed(() => {
+    return "Последнее обновление: " + dateParser.formatToRelative(
+        folder.value.lastChannelsUpdate ? new Date(folder.value.lastChannelsUpdate) : null);
+})
+
+function updateAccessName(selectedId) {
+    const selectedLevel = store.state.accessLevels.find(level => level.id === parseInt(selectedId));
+    if (selectedLevel) {
+        folder.value.access.name = selectedLevel.name;
+    }
+}
 </script>

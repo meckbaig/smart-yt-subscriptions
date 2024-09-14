@@ -4,7 +4,7 @@
             <a :href="url" target="_blank">
                 <img class="rounded-3 w-100" style="aspect-ratio: 16/9; object-fit: cover" :src="thumbnailDpi" loading="lazy">
                 <p class="badge position-absolute bottom-0 end-0 text-wrap" style="margin:4px; padding: 4px; padding-top: 2px; background-color: rgba(0, 0, 0, 0.8);">
-                    {{ simpleLendth }}</p>
+                    {{ simpleLength }}</p>
                 <p v-if="isNew" class="badge position-absolute bottom-0 start-0 text-wrap" style="margin:4px; padding: 4px; padding-top: 2px; background-color: rgba(0, 255, 0, 0.8);">Новое</p>
             </a>
         </div>
@@ -70,11 +70,10 @@ function updateThumbnailDpi() {
     thumbnailDpi.value = `https://i.ytimg.com/vi/${props.id}/${thumbnails.value[index].url}`
 }
 
-
 const props = defineProps({
     id: String,
     title: String,
-    simpleLendth: String,
+    simpleLength: String,
     viewCount: String,
     publishedAt: String,
     channelId: String,
@@ -87,13 +86,16 @@ const props = defineProps({
 const url = computed(() => {
     return 'https://www.youtube.com/watch?v=' + props.id
 })
+
 const channelUrl = computed(() => {
     return 'https://www.youtube.com/channel/' + props.channelId
 })
+
 const dateString = computed(() => {
     return new Date(props.publishedAt).toLocaleTimeString()
         + " " + new Date(props.publishedAt).toLocaleDateString()
 })
+
 const viewCountString = computed(() => {
     if (props.viewCount == "") {
         return "Прямая трансляция"
@@ -105,7 +107,6 @@ const viewCountString = computed(() => {
 })
 
 const wordingsViews = ["просмотр", "просмотра", "просмотров" ];
-
 </script>
 
 <style scoped>
@@ -133,7 +134,3 @@ const wordingsViews = ["просмотр", "просмотра", "просмот
     -webkit-box-orient: vertical;
 }
 </style>
-
-
-
-

@@ -1,6 +1,5 @@
 export default {
-    user: [],
-    channels: [],
+    user: {},
     folders: [],
     publicFolders: [],
     lastUpdated: [],

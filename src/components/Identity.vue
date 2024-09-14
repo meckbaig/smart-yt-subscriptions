@@ -45,95 +45,17 @@
 </template>
 
 <script setup>
-import * as connections from "../connections";
-import * as googleAuth from '../googleAuth2'
 import cookies from 'vue-cookies'
-import axios from 'axios'
 import store from '../store'
 import { googleTokenLogin } from 'vue3-google-login'
 import { computed, onMounted } from 'vue'
-import { changeTheme, isLightTheme, reverseTheme, sleep } from "../main";
+import { changeTheme, isLightTheme, reverseTheme } from "../main";
 
 const curUser = computed(() => store.state.user)
-const channels = computed(() => store.state.channels);
+const channels = computed(() => store.state.user.subChannels);
 
 async function getSubscriptions() {
-    let message = {
-        message: "Начато обновление списка каналов",
-        style: "alert-success"
-    }
-    store.commit("addMessage", message)
-    await execute(store.state.user.youtubeId);
-}
-
-async function execute(idValue, nextPageToken, totalResults) {
-    if (nextPageToken == undefined) {
-        store.commit('setChannels', "");
-    }
-    googleAuth.executeNext(idValue, nextPageToken).then(async (data) =>  {
-        if (data == undefined) {
-            let message = {
-                message: "Не выполнены условия. Проверьте ссылку на свой профиль и доступ к подпискам",
-                style: "alert-danger"
-            }
-            store.commit("addMessage", message)
-        }
-        else {
-            let jsonData = data;
-            await checkChannelsForTitles(jsonData)
-
-            if (channels.value.length == 0) {
-                store.commit('setChannels', cutSubChannels(jsonData.items));
-                totalResults = jsonData.pageInfo.totalResults;
-            }
-            else {
-                store.commit('concatChannels', cutSubChannels(jsonData.items));
-            }
-            nextPageToken = jsonData.nextPageToken;
-            if ((totalResults - channels.value.length > 0 && totalResults > 50) && nextPageToken != undefined) {
-                await execute(idValue, nextPageToken, totalResults)
-            }
-            else {
-                store.dispatch('updateSubChannels', { "id": store.state.user.id, "responseData": store.state.channels })
-            }
-        }
-    })
-}
-
-async function checkChannelsForTitles(channels) {
-    let idsWithoutTitle = [];
-    channels.items.forEach(item => {
-        if (item.snippet.title == undefined) {
-            idsWithoutTitle.push(item.snippet.resourceId.channelId);
-        }
-    });
-    if (idsWithoutTitle.length != 0) {
-        let channelsWithTitles = await googleAuth.getTitles(idsWithoutTitle)
-        let titleMap = {};
-        channelsWithTitles.items.forEach(item => {
-            titleMap[item.id] = item.snippet.title;
-        });
-        channels.items.forEach(channel => {
-            if (titleMap.hasOwnProperty(channel.snippet.resourceId.channelId)) {
-                channel.snippet.title = titleMap[channel.snippet.resourceId.channelId];
-            }
-        });
-    }
-    return channels;
-
-}
-
-function cutSubChannels(items) {
-    let result = [];
-    items.forEach(item => {
-        let newItem = {
-            channelId: item.snippet.resourceId.channelId,
-            title: item.snippet.title,
-            thumbnailUrl: item.snippet.thumbnails.default.url
-        }
-        result.push(newItem)
-    });
-    return result;
+    store.dispatch('updateSubChannels');
 }
 
 onMounted(async () => {
@@ -142,23 +64,13 @@ onMounted(async () => {
         store.commit('setTheme', theme);
     }
     document.documentElement.setAttribute("data-bs-theme", store.state.theme);
-    await loadUser()
-    return new Promise((reject) => {
-        //store.dispatch('getConnectionState').then(() => {
-        if (curUser.value.name) {
-            store.dispatch('getUserData', { "email": curUser.value.email, "youtubeId": curUser.value.youtubeId })
-        }
-        //})
-    }).catch((error) => {
-        reject(error)
-    })
+    await loadUser();
 })
 
 async function loadUser() {
-    let user_session = cookies.get('user_session')
-    if (user_session != null) {
-        store.commit('setUser', user_session)
-        //1000×60×60×24=86_400_000
+    let user = localStorage.getItem('user')
+    if (user != null) {
+        store.commit('setUser', JSON.parse(user))
         if (Date.now() - localStorage.getItem("lastLogin") > 86_400_000) {
             localStorage.clear()
             localStorage.setItem("lastLogin", Date.now())
@@ -167,74 +79,24 @@ async function loadUser() {
 }
 
 const login = () => {
-    googleTokenLogin().then((response) => {
-        callback(response)
+    googleTokenLogin().then(async (response) => {
+        await authCallback(response.access_token)
     })
 }
 
 const logout = () => {
-    cookies.remove('user_session')
-    store.commit('setUser')
-    store.commit('setChannels')
-    store.commit('setFolders')
-    store.commit('setLastUpdated')
-    localStorage.clear()
+    store.dispatch('logout');
 }
 
-const callback = (response) => {
-    axios.request({
-        headers: {
-            Authorization: `Bearer ${response.access_token}`
-        },
-        method: "GET",
-        url: `https://www.googleapis.com/oauth2/v3/userinfo`
-    }).then(async response => {
-        let responseData = response.data;
-        store.dispatch('getUserData', { "email": responseData.email, "youtubeId": "" })
-            .then(async () => {
-                const unsubscribeUserId = store.subscribe(async (mutations, state) => {
-                    if (mutations.type == 'setUserId') {
-                        await sleep(100);
-                        authorizate(responseData)
-                        unsubscribeUserId()
-                    }
-                })
-            })
-    });
-}
+const authCallback = async (access_token) => {
+    await store.dispatch('authorizeUser', access_token);
 
-async function authorizate(responseData) {
-    responseData['id'] = store.state.user.id
-    if (store.state.user.youtubeId != "") {
-        responseData['youtubeId'] = store.state.user.youtubeId
-        cookies.set("user_session", responseData, Infinity)
-        await loadUser()
+    localStorage.setItem('user', JSON.stringify(store.state.user));
+    localStorage.setItem("lastLogin", Date.now().toString());
+
+    if (store.state.user.subChannels.length === 0) {
+        await getSubscriptions();
     }
-    else {
-        connections.axiosGoogle.get(
-            `search?part=snippet&q=${responseData.name}&type=channel&key=AIzaSyACfvSjO1vX30rZarzIzK3ajC_BCja7JYg`)
-            .then(async ({ data }) => {
-                store.dispatch('updateYoutubeId', { "id": responseData.id, "youtubeId": data.items[0].id.channelId })
-                logout();
-                responseData['youtubeId'] = data.items[0].id.channelId
-                cookies.set("user_session", responseData, Infinity)
-                await loadUser()
-                store.dispatch('getUserData', { "email": curUser.value.email, "youtubeId": curUser.value.youtubeId })
-                    .then(() => {
-                        store.state.publicFolders = [];
-                        store.dispatch("setPublicFolders", store.state.user.id)
-                        const unsubscribe = store.subscribe(async (mutations, state) => {
-                            if (mutations.type == 'setChannels') {
-                                await sleep(100);
-                                if (store.state.channels.length == 0) {
-                                    getSubscriptions();
-                                }
-                                unsubscribe()
-                            }
-                        })
-                    })
-            });
-    }
+    store.dispatch("getFolders", store.state.user.id);
 }
-
 </script>

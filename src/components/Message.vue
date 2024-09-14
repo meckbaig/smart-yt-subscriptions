@@ -11,7 +11,6 @@
     </div>
 </template>
 
-
 <script setup>
 import store from '../store'
 const props = defineProps({
@@ -24,5 +23,4 @@ function close(){
     let message = { title: props.title, message: props.message, style: props.style }
     store.commit("removeMessage", message)
 }
-
 </script>

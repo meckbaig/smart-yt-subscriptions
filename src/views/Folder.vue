@@ -1,21 +1,27 @@
 <template>
     <div class="m-0 p-0 m-sm-2 p-sm-2">
-        <!-- <router-link class="top-0 end-0 position-absolute mt-4 m-2 p-1 btn btn-info"
-            :to="route.params.folder + '/edit'">Редактировать</router-link>
-        <a class="top-0 start-0 position-absolute mt-4 m-2 p-1 btn btn-info" @click="printConsts">Печать констант</a> -->
         <div v-if="folder.color"
             class="d-flex flex-row align-items-center rounded rounded-2 bg-opacity-50 gap-3 mt-2 mb-3 px-3"
             v-bind:style="'background: ' + folder.color">
             <img v-if="folder.icon != ''" v-bind:src="folder.icon" class="rounded rounded-3 align-self-center my-3"
                 style="max-height:50px;max-width:160px">
             <h2 v-bind:style="contrastColor(folder.color)" class="mt-1">{{ folder.name }}</h2>
-            <h5 v-if="lastCall > 0" v-bind:style="contrastColor(folder.color) + 'cursor: pointer;'"
-                class="ms-auto mt-1 text-end d-none d-md-flex" v-bind:title="lastCallString" @click="refreshFolderVideos()">
-                Последнее обновление: {{ dateParser.formatToRelative(lastCallString) }}</h5>
+            <h5 v-if="lastCall > 0" v-bind:style="contrastColor(folder.color)"
+                class="ms-auto mt-1 text-end d-none d-md-flex" v-bind:title="lastCallString">
+                Последнее обновление: {{ dateParser.formatToRelative(lastCallString) }}
+            </h5>
+            <button @click="refreshFolderVideos()" class="btn btn-light mx-0 py-1 ms-auto ms-md-0" v-bind:disabled="refreshButtonLocked">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+                    class="bi bi-arrow-clockwise m-0" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z" />
+                    <path
+                        d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466" />
+                </svg>
+            </button>
         </div>
         <div v-if="videos.length > 0"
             class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 row-cols-xxl-6">
-            <Video v-for="video in visibleVideos" :id="video.id" :title="video.title" :simpleLendth="video.simpleLendth"
+            <Video v-for="video in visibleVideos" :key="video.id" :id="video.id" :title="video.title" :simpleLength="video.simpleLength"
                 :viewCount="video.viewCount" :publishedAt="video.publishedAt" :channelId="video.channelId"
                 :channelTitle="video.channelTitle" :channelThumbnail="video.channelThumbnail"
                 :maxThumbnail="video.maxThumbnail" :isNew="video.isNew"></Video>
@@ -29,11 +35,10 @@
 <script setup>
 import { sleep, contrastColor } from "../main";
 import store from '../store'
-import * as connections from "../connections";
 import * as dateParser from "../dateParser";
 import Video from '../components/Video.vue'
 import { useRoute, onBeforeRouteLeave } from 'vue-router';
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watchEffect } from 'vue'
 
 let preventLoading = false;
 let page = 0;
@@ -44,64 +49,79 @@ const lastCallString = computed(() => {
 })
 const visibleVideos = ref([])
 const videos = ref([])
-const folder = ref([])
+const folder = ref({})
 const route = useRoute();
-const loadingText = ref([])
-loadingText.value = "Загрузка..."
-const loadingColor = ref([])
-const lastCall = ref([])
+const loadingText = ref("Загрузка...")
+const loadingColor = ref('')
+const lastCall = ref(0)
+const refreshButtonLocked = ref(true)
+const noAccess = ref(false)
 
 onMounted(async () => {
+    document.title = loadingText.value + " - Smart YT Subscriptions";
     window.addEventListener('scroll', checkPosition);
     window.addEventListener('resize', checkPosition);
-    connections.axiosClient.get(`Folder/Get?id=${route.params.folder}&userId=${store.state.user.id}`)
-        .then(({ data }) => {
-            folder.value = data;
-            document.title = folder.value.name + " - Smart YT Subscriptions";
-        })
-    let localStorageFolderData = JSON.parse(localStorage.getItem(route.params.folder));
-    //1000ms*60s*30m=1_800_000ms
-    if (localStorageFolderData && (Date.now() - localStorageFolderData.lastCall) < 1_800_000) {
-        lastCall.value = localStorageFolderData.lastCall;
-        videos.value = localStorageFolderData.data;
-        checkPosition();
-    }
-    else {
-        getFolderVideos();
-    }
+
+    await getFolderVideos();
+    setRefreshTimeout() 
 })
+
+function setRefreshTimeout() {
+    refreshButtonLocked.value = true;
+    let timeDiff = lastCall.value - Date.now();
+
+    setTimeout(() => {
+        refreshButtonLocked.value = false;
+    }, timeDiff + 20000);
+}
 
 onBeforeRouteLeave(async () => {
-      document.title = "Smart YT Subscriptions";
+    document.title = "Smart YT Subscriptions";
 })
 
-async function getFolderVideos() {
-    if (Date.now() - lastCall.value > 20000) {
-        videos.value = [];
-        await connections.axiosClient.get(`Folder/GetVideos?id=${route.params.folder}&userId=${store.state.user.id}`)
-            .then(({ data }) => {
-                videos.value = data;
-                lastCall.value = Date.now();
-                localStorage.setItem(route.params.folder, JSON.stringify({ "data": data, "lastCall": lastCall.value }));
-                checkPosition();
-            })
-            .catch(function (error) {
-                loadingText.value = error.response.data.title;
-                loadingColor.value = "text-danger";
-            });
+async function getFolderVideos(forceRefresh = false) {
+    videos.value = [];
+    visibleVideos.value = []; 
+    page = 0; 
+    noAccess.value = false;
+
+    try {
+        let response = await store.dispatch('getFolder', { folderId: route.params.folder, forceRefresh: forceRefresh });
+        folder.value = response.folder;
+        videos.value = response.videos;
+        if (videos.value.length == 0) {
+            loadingText.value = "Папка пуста";
+            loadingColor.value = "text-muted";
+        } else {
+            checkPosition();
+        }
+        document.title = folder.value.name + " - Smart YT Subscriptions";
+        lastCall.value = new Date(folder.value.lastVideosAccess);
+        localStorage.setItem(route.params.folder, JSON.stringify({ "folder": folder.value, "videos": videos.value, "lastCall": lastCall.value }));
+    } catch (error) {
+        handleErrors(error);
+    }
+}
+
+function handleErrors(error) {
+    if (error.response && error.response.status === 403) {
+        noAccess.value = true;
+        loadingText.value = "У вас нет доступа к данной папке";
+        loadingColor.value = "text-danger";
+    } else if (error.response && error.response.status === 400 && 
+               error.response.data.errors?.guid?.[0]?.code === "FolderDoesNotExist") {
+        loadingText.value = "Указанная папка не существует";
+        loadingColor.value = "text-danger";
+    } else {
+        console.error('Error fetching folder:', error);
+        loadingText.value = "Произошла ошибка при загрузке папки";
+        loadingColor.value = "text-danger";
     }
 }
 
 async function refreshFolderVideos() {
-    await getFolderVideos();
-    location.reload();
-}
-
-function printConsts() {
-    console.log("visibleVideos: ");
-    console.log(visibleVideos.value);
-    console.log("videos: ");
-    console.log(videos.value);
+    await getFolderVideos(true);
+    setRefreshTimeout();
 }
 
 async function checkPosition() {
@@ -127,5 +147,10 @@ async function checkPosition() {
     }
 }
 
-
+watchEffect(async () => {
+    await sleep(1000);
+    setInterval(() => {
+        lastCall.value = new Date(folder.value.lastVideosAccess);
+    }, 5000);
+})
 </script>

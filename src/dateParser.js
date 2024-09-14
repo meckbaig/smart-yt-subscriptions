@@ -1,6 +1,9 @@
 import { getWording } from "./wordings"
 
 export function formatToRelative(dateString) {
+    if (dateString == null ) {
+        return "Никогда";
+    }
     let date = isDate(dateString) ? dateString : parseDate(dateString);
     let currentDate = Date.now();
     let diffenence = currentDate - date;
