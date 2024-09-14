@@ -7,7 +7,7 @@ export async function updateSubChannels({ commit, dispatch }, responseData) {
         let token = cookies.get('token');
         let headers = { 'Authorization': `Bearer ${token}` };
         try {
-            const { data } = await connections.axiosClient.post(`v1.1/Users/UpdateSubChannels`, null, { headers });
+            const { data } = await connections.axiosClient.put(`v1.1/Users/UpdateSubChannels`, null, { headers });
             commit('setLastUpdated', data.lastChannelsUpdate);
             commit('setUserChannels', data.subChannels);
             let message = {
@@ -93,7 +93,7 @@ export async function updateYoutubeId({ commit, dispatch }, payload) {
         }
         let headers = { 'Authorization': `Bearer ${token}` };
         try {
-            await connections.axiosClientV1.post(`Users/UpdateYoutubeId`, { youtubeId: payload.youtubeId }, { headers });
+            await connections.axiosClientV1.put(`Users/UpdateYoutubeId`, { youtubeId: payload.youtubeId }, { headers });
 
             let message = {
                 title: "Успех",
