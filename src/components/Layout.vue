@@ -24,7 +24,7 @@
 
     <footer class="border-top footer text-muted" id="footer">
         <div class="container my-1">
-            &copy; 2023 <a @click="printall">-</a> SmartYtSubscriptions
+            &copy; 2024 <a @click="printall">-</a> SmartYtSubscriptions
             <button v-bind:class="'btn px-1 pt-0 ms-1 mb-1 border-0 ' + backendColor" style="font-size: 12px; 
                 padding-bottom: 1px;" disabled>Server</button>
             <button v-bind:class="'btn px-1 pt-0 ms-1 mb-1 border-0 ' + databaseColor" style="font-size: 12px;
