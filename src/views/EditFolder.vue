@@ -91,6 +91,7 @@ import ChannelItem from '../components/ChannelItem.vue'
 import draggable from 'vuedraggable';
 import * as dateParser from "../dateParser";
 import { useRoute } from 'vue-router';
+import { sleep } from "../main";
 import { computed, onMounted, ref } from 'vue'
 import store from '../store'
 import router from '../router'
@@ -123,13 +124,18 @@ onMounted(async () => {
             let data = await store.dispatch('getFolder', { folderId: route.params.folder, toEdit: true });
             folder.value = data.folder;
         }
-        updateListsHeight();
-        updateIconHeight();
+        initUpdateUi() 
     } catch (error) {
         console.error('Error:', error);
         handleErrors(error);
     }
 })
+
+async function initUpdateUi() {
+    await sleep(100);
+    updateListsHeight();
+    updateIconHeight();
+}
 
 function showNoAccessError() {
     noAccess.value = true;
