@@ -1,17 +1,13 @@
 import axios from 'axios'
 
 export const axiosClient = axios.create({
-  baseURL: (process.env.NODE_ENV === 'production' 
-    ? "https://www.syts-backend.ru" 
-    : "https://localhost:7150") + "/api"
+  baseURL: mainDomain + "/api"
 });
 
 export const axiosClientV1 = axios.create({
-  baseURL: (process.env.NODE_ENV === 'production' 
-    ? "https://www.syts-backend.ru" 
-    : "https://localhost:7150") + "/api/v1"
+  baseURL: mainDomain + "/api/v1"
 });
 
-export const axiosGoogle = axios.create({
-  baseURL: "https://www.googleapis.com/youtube/v3/",
-});
+const mainDomain = process.env.NODE_ENV === 'production' 
+    ? "https://www.smart-youtube-subscriptions-backend.ru" 
+    : "https://localhost:7150"
