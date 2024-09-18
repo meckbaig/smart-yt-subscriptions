@@ -71,10 +71,6 @@ async function loadUser() {
     let user = localStorage.getItem('user')
     if (user != null) {
         store.commit('setUser', JSON.parse(user))
-        if (Date.now() - localStorage.getItem("lastLogin") > 86_400_000) {
-            localStorage.clear()
-            localStorage.setItem("lastLogin", Date.now())
-        }
     }
 }
 
@@ -92,7 +88,6 @@ const authCallback = async (access_token) => {
     await store.dispatch('authorizeUser', access_token);
 
     localStorage.setItem('user', JSON.stringify(store.state.user));
-    localStorage.setItem("lastLogin", Date.now().toString());
 
     if (store.state.user.subChannels.length === 0) {
         await getSubscriptions();
