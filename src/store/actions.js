@@ -30,6 +30,11 @@ export async function updateFolder({ commit, dispatch }, payload) {
         try {
             const { data } = await connections.axiosClientV1.put(`Folders/${payload.folder.guid}`, payload, { headers });
             commit('setFolder', data.folder);
+            let message = {
+                title: "Сохранено",
+                style: "alert-success"
+            };
+            commit("addMessage", message);
             return data.folder; 
         } catch (error) {
             console.error('Failed to update folder:', error);
