@@ -72,12 +72,12 @@
                         <button @click="deleteFolder" class="btn btn-danger">Удалить</button>
                     </div>
                 </div>
-                <button @click="print" class="btn" style="background-color: transparent; border: none; cursor: default; color: transparent;">
-                    print
-                </button>
-                <p class="mb-2 opacity-50" @click="print()" v-bind:title="getLastUpdateTitle">
+                <p class="mb-0 opacity-50" @click="print()" v-bind:title="getLastUpdateTitle">
                     {{ getFormattedLastUpdate }}
                 </p>
+                <!-- <button @click="print" class="btn" style="background-color: transparent; border: none; cursor: default; color: transparent;">
+                    print
+                </button> -->
             </span>
         </span>
     </div>

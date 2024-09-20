@@ -15,7 +15,7 @@
         </nav>
     </header>
     <div class="container-fluid position-relative" v-bind:style="'min-height:' + mainHeight + 'px'">
-        <main id="main" role="main" class="pb-3" style="margin-top: 68px;">
+        <main id="main" role="main" class="pb-2" style="margin-top: 68px;">
             <router-view />
             <Message v-for="message in store.state.messages" :message="message.message" :title="message.title"
                 :style="message.style" />
