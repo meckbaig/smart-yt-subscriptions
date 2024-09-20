@@ -1,5 +1,5 @@
 <template>
-    <div v-if="folder.guid" class="row align-self-start p-2 m-2 gap-2">
+    <div v-if="folder.guid" class="row align-self-start px-2 pt-2 pb-0 mx-2 mt-2 mb-0 gap-2">
         <span class="col px-0">
             <input v-model="search" class="form-control mb-2" placeholder="Поиск" />
             <div class="border border-1 border-secondary rounded-2"
@@ -254,16 +254,20 @@ function onChange(index) {
 
 function updateListsHeight() {
     if (window.innerHeight < window.innerWidth * 1.5) {
-        channelsListHeight.value = window.innerHeight - document.getElementById("header").clientHeight - 70
+        channelsListHeight.value = window.innerHeight - document.getElementById("header").clientHeight
+            - 90 - document.getElementById("footer").clientHeight;
         if (document.getElementById("folderButtons")) {
             folderListHeight.value = window.innerHeight - document.getElementById("header").clientHeight
-                - 70 - document.getElementById("folderButtons").clientHeight
+                - 90 - document.getElementById("footer").clientHeight
+                 - document.getElementById("folderButtons").clientHeight;
         }
     }
     else {
-        channelsListHeight.value = window.innerHeight / 2 - document.getElementById("header").clientHeight - 70
+        channelsListHeight.value = window.innerHeight / 2 - document.getElementById("header").clientHeight
+            - 110 - document.getElementById("footer").clientHeight;
         folderListHeight.value = window.innerHeight / 2 - document.getElementById("header").clientHeight
-            - document.getElementById("folderButtons").clientHeight
+            + 50 - document.getElementById("footer").clientHeight
+             - document.getElementById("folderButtons").clientHeight;
     }
 }
 
