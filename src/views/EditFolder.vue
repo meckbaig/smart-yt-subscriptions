@@ -116,6 +116,10 @@ onMounted(async () => {
         showNoAccessError();
         return;
     }
+    await loadFolderData();
+})
+
+async function loadFolderData() {
     try {
         let folderData = store.state.folders.find(folder => folder.guid === route.params.folder);
         if (folderData) {
@@ -124,12 +128,12 @@ onMounted(async () => {
             let data = await store.dispatch('getFolder', { folderId: route.params.folder, toEdit: true });
             folder.value = data.folder;
         }
-        initUpdateUi() 
+        initUpdateUi();
     } catch (error) {
         console.error('Error:', error);
         handleErrors(error);
     }
-})
+}
 
 async function initUpdateUi() {
     await sleep(100);

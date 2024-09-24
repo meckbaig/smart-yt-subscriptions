@@ -10,7 +10,8 @@
                 class="ms-auto mt-1 text-end d-none d-md-flex" v-bind:title="lastCallString">
                 Последнее обновление: {{ dateParser.formatToRelative(lastCallString) }}
             </h5>
-            <button @click="refreshFolderVideos()" class="btn btn-light mx-0 py-1 ms-auto ms-md-0" v-bind:disabled="refreshButtonLocked">
+            <button @click="refreshFolderVideos()" class="btn btn-light mx-0 py-1 ms-auto ms-md-0"
+                v-bind:disabled="refreshButtonLocked">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
                     class="bi bi-arrow-clockwise m-0" viewBox="0 0 16 16">
                     <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z" />
@@ -21,10 +22,11 @@
         </div>
         <div v-if="videos.length > 0"
             class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 row-cols-xxl-6">
-            <Video v-for="video in visibleVideos" :key="video.id" :id="video.id" :title="video.title" :simpleLength="video.simpleLength"
-                :viewCount="video.viewCount" :publishedAt="video.publishedAt" :channelId="video.channelId"
-                :channelTitle="video.channelTitle" :channelThumbnail="video.channelThumbnail"
-                :maxThumbnail="video.maxThumbnail" :isNew="video.isNew"></Video>
+            <Video v-for="video in visibleVideos" :key="video.id" :id="video.id" :title="video.title"
+                :simpleLength="video.simpleLength" :viewCount="video.viewCount" :publishedAt="video.publishedAt"
+                :channelId="video.channelId" :channelTitle="video.channelTitle"
+                :channelThumbnail="video.channelThumbnail" :maxThumbnail="video.maxThumbnail"
+                :isNew="video.isNew"></Video>
         </div>
         <div v-else v-bind:class="'h3 text-center ' + loadingColor" id="loadingTextDiv">
             {{ loadingText }}
@@ -62,9 +64,17 @@ onMounted(async () => {
     window.addEventListener('scroll', checkPosition);
     window.addEventListener('resize', checkPosition);
 
+    preloadFolderData();
     await getFolderVideos();
-    setRefreshTimeout() 
+    setRefreshTimeout()
 })
+
+function preloadFolderData() {
+    let folderData = store.state.folders.find(folder => folder.guid === route.params.folder);
+    if (folderData) {
+        folder.value = folderData;
+    }
+}
 
 function setRefreshTimeout() {
     refreshButtonLocked.value = true;
@@ -81,8 +91,8 @@ onBeforeRouteLeave(async () => {
 
 async function getFolderVideos(forceRefresh = false) {
     videos.value = [];
-    visibleVideos.value = []; 
-    page = 0; 
+    visibleVideos.value = [];
+    page = 0;
     noAccess.value = false;
 
     try {
@@ -108,8 +118,8 @@ function handleErrors(error) {
         noAccess.value = true;
         loadingText.value = "У вас нет доступа к данной папке";
         loadingColor.value = "text-danger";
-    } else if (error.response && error.response.status === 400 && 
-               error.response.data.errors?.guid?.[0]?.code === "FolderDoesNotExist") {
+    } else if (error.response && error.response.status === 400 &&
+        error.response.data.errors?.guid?.[0]?.code === "FolderDoesNotExist") {
         loadingText.value = "Указанная папка не существует";
         loadingColor.value = "text-danger";
     } else {
