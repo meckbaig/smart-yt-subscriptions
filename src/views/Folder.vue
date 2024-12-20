@@ -79,6 +79,8 @@ function preloadFolderData() {
 function setRefreshTimeout() {
     refreshButtonLocked.value = true;
     let timeDiff = lastCall.value - Date.now();
+    if (timeDiff < 0)
+        refreshButtonLocked.value = false;
 
     setTimeout(() => {
         refreshButtonLocked.value = false;
