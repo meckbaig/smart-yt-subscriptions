@@ -18,7 +18,7 @@ const ytId = ref('')
 
 onMounted(() => {
     ytId.value = store.state.user.youtubeId;
-    if (ytId.value == undefined) {
+    if (ytId.value === undefined) {
         router.push({ name: "home" })
     }
 })
