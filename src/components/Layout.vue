@@ -3,7 +3,7 @@
         <nav class="navbar navbar-expand-md border-bottom box-shadow mb-3 py-0 fixed-top bg-body flex-nowrap" id="header">
             <div class="flex-row d-flex ms-3">
                 <router-link :to="{ name: 'home' }" class="navbar-brand text-truncate my-0 d-flex flex-row gap-3">
-                    <img type="image/png" src="/syts-icon-new.png" class="m-0" style="height: 48px;" />
+                    <img type="image/svg" src="/syts-icon-new.svg" class="my-1" style="height: 42px;" />
                     <div class="d-flex d-sm-none align-self-center">SYTS</div>
                     <div class="d-none d-sm-flex align-self-center">SmartYtSubscriptions</div>
                 </router-link>
