@@ -90,6 +90,9 @@ onMounted(() => {
    if (Object.keys(route.query).length > 0) {
       return;
    }
+   if (store.state.user.youtubeId === null) {
+      warning.value = "Внимание!"
+   }
    const unsubscribeSetChannels = store.subscribe(async (mutations, state) => {
       if (mutations.type == 'setChannels') {
          loadingTextF.value = ""
