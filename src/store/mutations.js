@@ -64,4 +64,6 @@ export function updateFolders(state, data) {
   }
 }
 
-
+export function setSnowEnabled(state, enabled) {
+  state.snowEnabled = enabled;
+}

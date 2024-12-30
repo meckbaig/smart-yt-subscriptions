@@ -24,5 +24,6 @@ export default {
     theme: 'light',
     folderImageSize: [ 50, 160 ],
     videosOnPage: 20, 
+    snowEnabled: true,
     debug: false
 }

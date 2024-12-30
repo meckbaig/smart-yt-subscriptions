@@ -37,6 +37,13 @@
                     <label class="form-check-label p-0 m-0">светлая</label>
                 </div>
             </li>
+            <li v-if="newYearChecker">
+                <div class="d-flex justify-content-center align-items-center form-check form-switch gap-0 fs-6 p-0 m-0">
+                    <label class="form-check-label p-0 m-0">Снег:</label>
+                    <input v-model="isSnowEnabled" class="form-check-input p-0 m-0 mx-2 mt-1" type="checkbox" role="switch"
+                        id="snowCheck" v-on:change="toggleSnow">
+                </div>
+            </li>
         </ul>
     </div>
     <button v-else @click="login" v-bind:class="'mx-2 btn btn-outline-' + reverseTheme">
@@ -49,10 +56,15 @@ import cookies from 'vue-cookies'
 import store from '../store'
 import { googleTokenLogin } from 'vue3-google-login'
 import { computed, onMounted } from 'vue'
-import { changeTheme, isLightTheme, reverseTheme } from "../main";
+import { changeTheme, isLightTheme, reverseTheme, newYearChecker } from "../main";
 
 const curUser = computed(() => store.state.user)
 const channels = computed(() => store.state.user.subChannels);
+
+const isSnowEnabled = computed({
+    get: () => store.state.snowEnabled === undefined ? true : store.state.snowEnabled,
+    set: (value) => store.commit('setSnowEnabled', value)
+})
 
 async function getSubscriptions() {
     store.dispatch('updateSubChannels');
@@ -62,6 +74,10 @@ onMounted(async () => {
     let theme = cookies.get('theme')
     if (theme != undefined) {
         store.commit('setTheme', theme);
+    }
+    let snowEnabled = cookies.get('snowEnabled')
+    if (snowEnabled !== null) {
+        store.commit('setSnowEnabled', snowEnabled === 'true')
     }
     document.documentElement.setAttribute("data-bs-theme", store.state.theme);
     await loadUser();
@@ -93,5 +109,10 @@ const authCallback = async (access_token) => {
         await getSubscriptions();
     }
     store.dispatch("getFolders", store.state.user.id);
+}
+
+function toggleSnow() {
+    store.commit('setSnowEnabled', isSnowEnabled.value);
+    cookies.set('snowEnabled', isSnowEnabled.value, Infinity)
 }
 </script>
