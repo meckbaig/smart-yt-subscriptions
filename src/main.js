@@ -69,10 +69,28 @@ export const newYearChecker = computed(() => {
     return currentMonth === 12 || currentMonth === 1;
 });
 
-function updateFavicon() {
-    const favicon = document.querySelector('link[rel="icon"]');
-    if (favicon) {
-        favicon.href = newYearChecker.value ? '/src/assets/syts-icon-new-year-themed.svg' : '/src/assets/syts-icon.svg';
+export function updateFavicon() {
+    const tryUpdate = () => {
+        const favicon = document.querySelector('link[rel="icon"]');
+        const currentImg = document.getElementById('mainIcon');
+        if (favicon && currentImg) {
+            favicon.href = currentImg.src;
+            return true;
+        }
+        return false;
+    };
+
+    // Try immediately first
+    if (!tryUpdate()) {
+        // If failed, retry every 100ms until successful
+        const interval = setInterval(() => {
+            if (tryUpdate()) {
+                clearInterval(interval);
+            }
+        }, 100);
+        
+        // Clear interval after 5 seconds to prevent infinite attempts
+        setTimeout(() => clearInterval(interval), 500);
     }
 }
 
