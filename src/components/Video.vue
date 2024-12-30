@@ -2,15 +2,21 @@
     <div v-bind:id="id" class="col align-content-top rounded mb-2">
         <div class="position-relative">
             <a :href="url" target="_blank">
-                <img class="rounded-3 w-100" style="aspect-ratio: 16/9; object-fit: cover" :src="thumbnailDpi" loading="lazy">
-                <p class="badge position-absolute bottom-0 end-0 text-wrap" style="margin:4px; padding: 4px; padding-top: 2px; background-color: rgba(0, 0, 0, 0.8);">
-                    {{ simpleLength }}</p>
-                <p v-if="isNew" class="badge position-absolute bottom-0 start-0 text-wrap" style="margin:4px; padding: 4px; padding-top: 2px; background-color: rgba(0, 255, 0, 0.8);">Новое</p>
+                <img class="rounded-3 w-100" style="aspect-ratio: 16/9; object-fit: cover" :src="thumbnailDpi"
+                    loading="lazy">
+                <p class="badge position-absolute bottom-0 end-0 text-wrap"
+                    style="margin:4px; padding: 4px; padding-top: 2px; background-color: rgba(0, 0, 0, 0.8);">
+                    {{ simpleLength }}
+                </p>
+                <p v-if="isNew" class="badge position-absolute bottom-0 start-0 text-wrap"
+                    style="margin:4px; padding: 4px; padding-top: 2px; background-color: rgba(0, 255, 0, 0.8);">Новое
+                </p>
             </a>
         </div>
         <div class="d-flex align-items-top mt-2">
             <a :href="channelUrl" target="_blank" class="me-2 p-0 mt-1 mb-auto">
-                <img :src="channelThumbnail" loading="lazy" draggable="false" width="32" height="32" class="rounded-circle">
+                <img :src="channelThumbnail" loading="lazy" draggable="false" width="32" height="32"
+                    class="rounded-circle">
             </a>
             <ul class="list-unstyled mt-0">
                 <li>
@@ -27,10 +33,18 @@
                         <a class="text-decoration-none text-nowrap text-reset p-0 m-0 fw-normal lh-1"
                             style="font-size: 14px;">
                             {{ viewCountString }}</a>
-                        <p class="m-0 p-0 mx-1">•</p>
-                        <a class="text-decoration-none text-nowrap text-reset p-0 m-0 fw-normal lh-1"
-                            style="font-size: 14px;" v-bind:title="dateString">
-                            {{ dateParser.formatToRelative(dateString) }}</a>
+                        <template v-if="isLiveNow">
+                            <p class="m-0 p-0 mx-1">•</p>
+                            <span class="badge mt-1 text-white rounded-1" style="background-color: rgb(255, 0, 0); font-size: 12px;">
+                                В эфире
+                            </span>
+                        </template>
+                        <template v-if="shouldShowDate">
+                            <p class="m-0 p-0 mx-1">•</p>
+                            <a class="text-decoration-none text-nowrap text-reset p-0 m-0 fw-normal lh-1"
+                                style="font-size: 14px;" v-bind:title="dateString">
+                                {{ dateParser.formatToRelative(dateString) }}</a>
+                        </template>
                     </div>
                 </li>
             </ul>
@@ -55,7 +69,7 @@ onMounted(() => {
 })
 
 function updateThumbnailDpi() {
-    if (!document.getElementById(props.id)){
+    if (!document.getElementById(props.id)) {
         window.removeEventListener('resize', updateThumbnailDpi);
         return;
     }
@@ -80,7 +94,15 @@ const props = defineProps({
     channelTitle: String,
     channelThumbnail: String,
     maxThumbnail: Number,
-    isNew: Boolean
+    isNew: Boolean,
+    liveStreamingDetails: {
+        type: Object,
+        default: () => ({
+            scheduledStartTime: null,
+            actualStartTime: null,
+            concurrentViewers: null
+        })
+    }
 })
 
 const url = computed(() => {
@@ -96,17 +118,38 @@ const dateString = computed(() => {
         + " " + new Date(props.publishedAt).toLocaleDateString()
 })
 
-const viewCountString = computed(() => {
-    if (props.viewCount == "") {
-        return "Прямая трансляция"
-    }
-    let inViewCount = props.viewCount.replace(" ", "");
-    let resultString = getWording(inViewCount, wordingsViews);
-    let tmpArr = resultString.split(" ");
-    return `${ Number(tmpArr[0]).toLocaleString('ru-RU')} ${tmpArr[1]}`;
+const isLiveNow = computed(() => {
+    return props.liveStreamingDetails?.concurrentViewers != null
 })
 
-const wordingsViews = ["просмотр", "просмотра", "просмотров" ];
+const isScheduledStream = computed(() => {
+    if (!props.liveStreamingDetails?.scheduledStartTime) return false
+    const scheduledTime = new Date(props.liveStreamingDetails?.scheduledStartTime)
+    return scheduledTime > new Date()
+})
+
+const shouldShowDate = computed(() => {
+    return !isLiveNow.value && !isScheduledStream.value
+})
+
+const viewCountString = computed(() => {
+    if (isLiveNow.value) {
+        let resultString = getWording(props.liveStreamingDetails?.concurrentViewers, wordingsViewers)
+        let tmpArr = resultString.split(" ");
+        return `${Number(tmpArr[0]).toLocaleString('ru-RU')} ${tmpArr[1]}`;
+    }
+
+    if (isScheduledStream.value) {
+        const scheduledTime = new Date(props.liveStreamingDetails?.scheduledStartTime)
+        return `Начало: ${new Date(scheduledTime).toLocaleDateString()} ${new Date(scheduledTime).toLocaleTimeString()}`
+    }
+    let resultString = getWording(props.viewCount, wordingsViews);
+    let tmpArr = resultString.split(" ");
+    return `${Number(tmpArr[0]).toLocaleString('ru-RU')} ${tmpArr[1]}`;
+})
+
+const wordingsViews = ["просмотр", "просмотра", "просмотров"];
+const wordingsViewers = ["зритель", "зрителя", "зрителей"];
 </script>
 
 <style scoped>

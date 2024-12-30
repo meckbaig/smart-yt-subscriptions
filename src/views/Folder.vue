@@ -22,10 +22,18 @@
         </div>
         <div v-if="videos.length > 0"
             class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 row-cols-xxl-6">
-            <Video v-for="video in visibleVideos" :key="video.id" :id="video.id" :title="video.title"
-                :simpleLength="video.simpleLength" :viewCount="video.viewCount" :publishedAt="video.publishedAt"
-                :channelId="video.channelId" :channelTitle="video.channelTitle"
-                :channelThumbnail="video.channelThumbnail" :maxThumbnail="video.maxThumbnail"
+            <Video v-for="video in visibleVideos" 
+                :key="video.id" 
+                :id="video.id"
+                :title="video.title"
+                :simpleLength="video.simpleLength" 
+                :viewCount="video.viewCount" 
+                :publishedAt="video.publishedAt"
+                :channelId="video.channelId" 
+                :channelTitle="video.channelTitle"
+                :channelThumbnail="video.channelThumbnail" 
+                :maxThumbnail="video.maxThumbnail"
+                :liveStreamingDetails="video.liveStreamingDetails"
                 :isNew="video.isNew"></Video>
         </div>
         <div v-else v-bind:class="'h3 text-center ' + loadingColor" id="loadingTextDiv">
