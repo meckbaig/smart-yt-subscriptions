@@ -6,7 +6,7 @@
             <img v-if="folder.icon != ''" v-bind:src="folder.icon" class="rounded rounded-3 align-self-center my-3"
                 style="max-height:50px;max-width:160px">
             <h2 v-bind:style="contrastColor(folder.color)" class="mt-1">{{ folder.name }}</h2>
-            <h5 v-if="lastCall > 0" v-bind:style="contrastColor(folder.color)"
+            <h5 v-if="lastCallIsValid()" v-bind:style="contrastColor(folder.color)"
                 class="ms-auto mt-1 text-end d-none d-md-flex" v-bind:title="lastCallString">
                 Последнее обновление: {{ dateParser.formatToRelative(lastCallString) }}
             </h5>
@@ -55,9 +55,10 @@ const folder = ref({})
 const route = useRoute();
 const loadingText = ref("Загрузка...")
 const loadingColor = ref('')
-const lastCall = ref(0)
 const refreshButtonLocked = ref(true)
 const noAccess = ref(false)
+const refreshButtonTimeoutMs = 20000
+const lastCall = ref(new Date(0))
 
 onMounted(async () => {
     document.title = loadingText.value + " - Smart YT Subscriptions";
@@ -72,19 +73,30 @@ onMounted(async () => {
 function preloadFolderData() {
     let folderData = store.state.folders.find(folder => folder.guid === route.params.folder);
     if (folderData) {
-        folder.value = folderData;
+        setFolder(folderData);
     }
+}
+
+function setFolder(newFolderValue) {
+    folder.value = newFolderValue;
+    lastCall.value = new Date(folder.value.lastVideosAccess);
 }
 
 function setRefreshTimeout() {
     refreshButtonLocked.value = true;
     let timeDiff = lastCall.value - Date.now();
-    if (timeDiff < 0)
+    if (timeDiff < (refreshButtonTimeoutMs * -1)) {
         refreshButtonLocked.value = false;
+    }
+    else {
+        setTimeout(() => {
+            refreshButtonLocked.value = false;
+        }, timeDiff + refreshButtonTimeoutMs);
+    }
+}
 
-    setTimeout(() => {
-        refreshButtonLocked.value = false;
-    }, timeDiff + 20000);
+let lastCallIsValid = () => {
+    return lastCall.value > 0;
 }
 
 onBeforeRouteLeave(async () => {
@@ -99,7 +111,7 @@ async function getFolderVideos(forceRefresh = false) {
 
     try {
         let response = await store.dispatch('getFolder', { folderId: route.params.folder, forceRefresh: forceRefresh });
-        folder.value = response.folder;
+        setFolder(response.folder);
         videos.value = response.videos;
         if (videos.value.length == 0) {
             loadingText.value = "Папка пуста";
@@ -108,7 +120,6 @@ async function getFolderVideos(forceRefresh = false) {
             checkPosition();
         }
         document.title = folder.value.name + " - Smart YT Subscriptions";
-        lastCall.value = new Date(folder.value.lastVideosAccess);
         localStorage.setItem(route.params.folder, JSON.stringify({ "folder": folder.value, "videos": videos.value, "lastCall": lastCall.value }));
     } catch (error) {
         handleErrors(error);
@@ -162,7 +173,7 @@ async function checkPosition() {
 watchEffect(async () => {
     await sleep(1000);
     setInterval(() => {
-        lastCall.value = new Date(folder.value.lastVideosAccess);
+        lastCall.value = new Date(folder.value.lastVideosAccess)
     }, 5000);
 })
 </script>
