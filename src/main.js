@@ -72,7 +72,7 @@ export const newYearChecker = computed(() => {
 function updateFavicon() {
     const favicon = document.querySelector('link[rel="icon"]');
     if (favicon) {
-        favicon.href = newYearChecker.value ? '/syts-icon-new-year-themed.svg' : '/syts-icon.svg';
+        favicon.href = newYearChecker.value ? '/src/assets/syts-icon-new-year-themed.svg' : '/src/assets/syts-icon.svg';
     }
 }
 

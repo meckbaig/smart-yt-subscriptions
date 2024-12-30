@@ -3,8 +3,8 @@
         <nav class="navbar navbar-expand-md border-bottom box-shadow mb-3 py-0 fixed-top bg-body flex-nowrap" id="header">
             <div class="flex-row d-flex ms-3">
                 <router-link :to="{ name: 'home' }" class="navbar-brand text-truncate my-0 d-flex flex-row gap-3">
-                    <img type="image/svg" :src="newYearChecker ? '/syts-icon-new-year-themed.svg' : '/syts-icon.svg'" 
-                         class="my-1" style="height: 42px;" />
+                    <img v-if="newYearChecker" type="image/svg" src="/src/assets/syts-icon-new-year-themed.svg" class="my-1" style="height: 42px;" />
+                    <img v-else type="image/svg" src="/src/assets/syts-icon.svg" class="my-1" style="height: 42px;" />
                     <div class="d-flex d-sm-none align-self-center">SYTS</div>
                     <div class="d-none d-sm-flex align-self-center">SmartYtSubscriptions</div>
                 </router-link>
