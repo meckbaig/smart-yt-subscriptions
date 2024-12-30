@@ -1,4 +1,4 @@
-import { computed, createApp } from 'vue'
+import { computed, createApp, watchEffect } from 'vue'
 import router from './router'
 import store from './store'
 import './style.css'
@@ -63,3 +63,21 @@ export const reverseTheme = computed(() => {
 export function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+export const newYearChecker = computed(() => {
+    const currentMonth = new Date().getMonth() + 1;
+    return currentMonth === 12 || currentMonth === 1;
+});
+
+function updateFavicon() {
+    const favicon = document.querySelector('link[rel="icon"]');
+    if (favicon) {
+        favicon.href = newYearChecker.value ? '/syts-icon-new-year-themed.svg' : '/syts-icon.svg';
+    }
+}
+
+watchEffect(() => {
+    if (newYearChecker.value !== undefined) {
+        updateFavicon();
+    }
+});

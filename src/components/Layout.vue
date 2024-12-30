@@ -3,7 +3,8 @@
         <nav class="navbar navbar-expand-md border-bottom box-shadow mb-3 py-0 fixed-top bg-body flex-nowrap" id="header">
             <div class="flex-row d-flex ms-3">
                 <router-link :to="{ name: 'home' }" class="navbar-brand text-truncate my-0 d-flex flex-row gap-3">
-                    <img type="image/svg" src="/syts-icon-new.svg" class="my-1" style="height: 42px;" />
+                    <img type="image/svg" :src="newYearChecker ? '/syts-icon-new-year-themed.svg' : '/syts-icon.svg'" 
+                         class="my-1" style="height: 42px;" />
                     <div class="d-flex d-sm-none align-self-center">SYTS</div>
                     <div class="d-none d-sm-flex align-self-center">SmartYtSubscriptions</div>
                 </router-link>
@@ -14,7 +15,17 @@
             <Identity class="ms-auto" />
         </nav>
     </header>
-    <div class="container-fluid position-relative" v-bind:style="'min-height:' + mainHeight + 'px'">
+    
+    <Snow v-if="newYearChecker && store.state.snowEnabled" 
+          :snowflake-count="75" 
+          :speed-multiplier="0.2"
+          :rotation-speed-multiplier="0.1"
+          :min-size="25"
+          :max-size="50"
+          :opacity="0.75"
+          particle="❆" />
+          
+    <div class="container-fluid position-relative" style="z-index: 2" v-bind:style="'min-height:' + mainHeight + 'px'">
         <main id="main" role="main" class="pb-2" style="margin-top: 68px;">
             <router-view />
             <Message v-for="message in store.state.messages" :message="message.message" :title="message.title"
@@ -22,7 +33,7 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted" id="footer">
+    <footer class="border-top footer text-muted bg-body" id="footer">
         <div class="container my-1">
             &copy; 2024 <a @click="printall">-</a> SmartYtSubscriptions
             <button v-bind:class="'btn px-1 pt-0 ms-1 mb-1 border-0 ' + backendColor" style="font-size: 12px; 
@@ -45,9 +56,10 @@
 import { computed, onMounted, ref } from 'vue'
 import Identity from './Identity.vue';
 import Message from './Message.vue';
+import Snow from './Snow.vue';
 import store from '../store'
 import cookies from 'vue-cookies'
-import { reverseTheme } from "../main"
+import { reverseTheme, newYearChecker } from "../main"
 
 onMounted(() => {
     updateMainHeight()
