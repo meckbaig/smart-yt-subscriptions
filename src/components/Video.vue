@@ -1,15 +1,16 @@
 <template>
-    <div v-bind:id="id" class="col align-content-top rounded mb-2">
+    <div v-bind:id="id" class="col align-content-top rounded mb-2 position-relative">
+        <div class="bg-body opacity-50 rounded position-absolute mx-2 mb-2 blurred-border" style="top: 0; right: 0; bottom: 0; left: 0; z-index: -1;"/>
         <div class="position-relative">
             <a :href="url" target="_blank">
                 <img class="rounded-3 w-100" style="aspect-ratio: 16/9; object-fit: cover" :src="thumbnailDpi"
                     loading="lazy">
                 <p class="badge position-absolute bottom-0 end-0 text-wrap"
-                    style="margin:4px; padding: 4px; padding-top: 2px; background-color: rgba(0, 0, 0, 0.8);">
+                    style="margin: 4px; padding: 4px; padding-top: 2px; background-color: rgba(0, 0, 0, 0.8);">
                     {{ simpleLength }}
                 </p>
                 <p v-if="isNew" class="badge position-absolute bottom-0 start-0 text-wrap"
-                    style="margin:4px; padding: 4px; padding-top: 2px; background-color: rgba(0, 255, 0, 0.8);">Новое
+                    style="margin: 4px; padding: 4px; padding-top: 2px; background-color: rgba(0, 255, 0, 0.8);">Новое
                 </p>
             </a>
         </div>
@@ -175,5 +176,18 @@ const wordingsViewers = ["зритель", "зрителя", "зрителей"]
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-box-orient: vertical;
+}
+
+.blurred-border::before {
+    content: '';
+    position: absolute;
+    top: -4px; /* Задайте размер размытия за пределами элемента */
+    right: -4px;
+    bottom: -4px;
+    left: -4px;
+    border-radius: inherit; /* Наследование закругленных углов */
+    background: inherit; /* Наследование фона родителя */
+    filter: blur(4px); /* Интенсивность размытия */
+    z-index: -1; /* Убедитесь, что размытие остается на заднем плане */
 }
 </style>
