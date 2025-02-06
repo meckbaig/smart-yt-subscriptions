@@ -3,7 +3,8 @@
         <nav class="navbar navbar-expand-md border-bottom box-shadow mb-3 py-0 fixed-top bg-body flex-nowrap" id="header">
             <div class="flex-row d-flex ms-3">
                 <router-link :to="{ name: 'home' }" class="navbar-brand text-truncate my-0 d-flex flex-row gap-3">
-                    <img v-if="newYearChecker" id="mainIcon" type="image/svg" src="/src/assets/syts-icon-new-year-themed.svg" class="my-1" style="height: 42px;" />
+                    <img v-if="meckbaigBirhdayChecker" id="mainIcon" type="image/svg" src="/src/assets/syts-icon-birthday-themed.svg" class="my-1" style="height: 42px;" />
+                    <img v-else-if="newYearChecker" id="mainIcon" type="image/svg" src="/src/assets/syts-icon-new-year-themed.svg" class="my-1" style="height: 42px;" />
                     <img v-else type="image/svg" id="mainIcon" src="/src/assets/syts-icon.svg" class="my-1" style="height: 42px;" />
                     <div class="d-flex d-sm-none align-self-center">SYTS</div>
                     <div class="d-none d-sm-flex align-self-center">SmartYtSubscriptions</div>
@@ -24,6 +25,15 @@
           :max-size="50"
           :opacity="0.75"
           particle="❆" />
+
+    <Birthday v-if="meckbaigBirhdayChecker && store.state.meckbaigBirhdayEnabled" 
+          :particle-count="35" 
+          :speed-multiplier="0.2"
+          :rotation-speed-multiplier="1"
+          :min-size="25"
+          :max-size="50"
+          :opacity="0.75"
+          particle="🥳" />
           
     <div class="container-fluid position-relative" style="z-index: 2" v-bind:style="'min-height:' + mainHeight + 'px'">
         <main id="main" role="main" class="pb-2" style="margin-top: 68px;">
@@ -57,9 +67,11 @@ import { computed, onMounted, ref } from 'vue'
 import Identity from './Identity.vue';
 import Message from './Message.vue';
 import Snow from './Snow.vue';
+import Birthday from './Birthday.vue';
 import store from '../store'
 import cookies from 'vue-cookies'
-import { reverseTheme, newYearChecker } from "../main"
+import { reverseTheme, newYearChecker, meckbaigBirhdayChecker } from "../main"
+
 
 onMounted(() => {
     updateMainHeight()

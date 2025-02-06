@@ -69,6 +69,11 @@ export const newYearChecker = computed(() => {
     return currentMonth === 12 || currentMonth === 1;
 });
 
+export const meckbaigBirhdayChecker = computed(() => {
+    const currentDate = new Date();
+    return (currentDate.getMonth() + 1) === 3 && currentDate.getDate() === 2;
+});
+
 export function updateFavicon() {
     const tryUpdate = () => {
         const favicon = document.querySelector('link[rel="icon"]');
