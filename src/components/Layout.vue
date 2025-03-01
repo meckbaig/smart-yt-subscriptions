@@ -7,7 +7,8 @@
                     <img v-else-if="newYearChecker" id="mainIcon" type="image/svg" src="/src/assets/syts-icon-new-year-themed.svg" class="my-1" style="height: 42px;" />
                     <img v-else type="image/svg" id="mainIcon" src="/src/assets/syts-icon.svg" class="my-1" style="height: 42px;" />
                     <div class="d-flex d-sm-none align-self-center">SYTS</div>
-                    <div class="d-none d-sm-flex align-self-center">SmartYtSubscriptions</div>
+                    <div v-if="meckbaigBirhdayChecker" class="d-none d-sm-flex align-self-center">🥳 Happy Birthday Meckbaig! 🥳</div>
+                    <div v-else class="d-none d-sm-flex align-self-center">SmartYtSubscriptions</div>
                 </router-link>
                 <!-- <button @click="getSubs"></button>  -->
                 <!-- <button @click="loginAsp" class="btn btn-outline-success">Залогиниться</button>
@@ -26,14 +27,7 @@
           :opacity="0.75"
           particle="❆" />
 
-    <Birthday v-if="meckbaigBirhdayChecker && store.state.meckbaigBirhdayEnabled" 
-          :particle-count="35" 
-          :speed-multiplier="0.2"
-          :rotation-speed-multiplier="1"
-          :min-size="25"
-          :max-size="50"
-          :opacity="0.75"
-          particle="🥳" />
+    <Confetti v-if="meckbaigBirhdayChecker && store.state.meckbaigBirhdayEnabled"/>
           
     <div class="container-fluid position-relative" style="z-index: 2" v-bind:style="'min-height:' + mainHeight + 'px'">
         <main id="main" role="main" class="pb-2" style="margin-top: 68px;">
@@ -67,7 +61,7 @@ import { computed, onMounted, ref } from 'vue'
 import Identity from './Identity.vue';
 import Message from './Message.vue';
 import Snow from './Snow.vue';
-import Birthday from './Birthday.vue';
+import Confetti from './Confetti.vue';
 import store from '../store'
 import cookies from 'vue-cookies'
 import { reverseTheme, newYearChecker, meckbaigBirhdayChecker } from "../main"
