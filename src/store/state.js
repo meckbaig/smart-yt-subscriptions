@@ -25,5 +25,6 @@ export default {
     folderImageSize: [ 50, 160 ],
     videosOnPage: 20, 
     snowEnabled: true,
+    meckbaigBirhdayEnabled: true,
     debug: false
 }
