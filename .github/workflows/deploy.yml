@@ -15,22 +15,32 @@ jobs:
         id: fetch_deploy
         run: |
           API_URL="https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys"
-          MAX_RETRIES=60 
+          MAX_RETRIES=30 
           COUNT=0
 
           while [ "$COUNT" -lt "$MAX_RETRIES" ]; do
             echo "Checking deployment status..."
-            LATEST_DEPLOY=$(curl -s -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" $API_URL | jq -r '.[0].deploy')
+            RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" $API_URL)
+
+            if [ $? -ne 0 ] || [ -z "$RESPONSE" ]; then
+              echo "Error: Failed to fetch deployment status from Render API!"
+              exit 1
+            fi
+
+            LATEST_DEPLOY=$(echo "$RESPONSE" | jq -r '.[0].deploy')
             
             DEPLOY_ID=$(echo "$LATEST_DEPLOY" | jq -r '.id')
             COMMIT_ID=$(echo "$LATEST_DEPLOY" | jq -r '.commit.id')
             DEPLOY_STATUS=$(echo "$LATEST_DEPLOY" | jq -r '.status')
 
-            echo "Deployment ID: $DEPLOY_ID"
-            echo "Commit ID: $COMMIT_ID"
-            echo "Current Status: $DEPLOY_STATUS"
+            if [ "$COUNT" = 0 ]; then
+              echo "Deployment ID: $DEPLOY_ID"
+              echo "Commit ID: $COMMIT_ID"
+              echo "Current Status: $DEPLOY_STATUS"
+              FIRST_RUN=false
+            fi
 
-            if [ "$DEPLOY_STATUS" == "live" ] || [ "$DEPLOY_STATUS" == "failed" ]; then
+            if [ "$DEPLOY_STATUS" == "live" ] || [ "$DEPLOY_STATUS" == "build_failed" ]; then
               echo "DEPLOY_STATUS=$DEPLOY_STATUS" >> $GITHUB_ENV
               echo "COMMIT_ID=$COMMIT_ID" >> $GITHUB_ENV
               echo "Deployment finished with status: $DEPLOY_STATUS"
@@ -52,7 +62,7 @@ jobs:
           STATUS="pending"
           if [ "$DEPLOY_STATUS" == "live" ]; then
             STATUS="success"
-          elif [ "$DEPLOY_STATUS" == "failed" ]; then
+          elif [ "$DEPLOY_STATUS" == "build_failed" ]; then
             STATUS="failure"
           elif [ "$DEPLOY_STATUS" == "timeout" ]; then
             STATUS="error"
