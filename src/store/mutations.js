@@ -67,3 +67,7 @@ export function updateFolders(state, data) {
 export function setSnowEnabled(state, enabled) {
   state.snowEnabled = enabled;
 }
+
+export function setMeckbaigBirthdayEnabled(state, enabled) {
+  state.meckbaigBirthdayEnabled = enabled;
+}
