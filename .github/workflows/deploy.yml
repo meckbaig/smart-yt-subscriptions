@@ -34,7 +34,7 @@ jobs:
               echo "DEPLOY_STATUS=$DEPLOY_STATUS" >> $GITHUB_ENV
               echo "COMMIT_ID=$COMMIT_ID" >> $GITHUB_ENV
               echo "Deployment finished with status: $DEPLOY_STATUS"
-              break
+              exit 0
             fi
 
             echo "Deployment is still in progress... Waiting 10 seconds"
@@ -42,10 +42,10 @@ jobs:
             ((COUNT++))
           done
 
-          if [ "$COUNT" -ge "$MAX_RETRIES" ]; then
-            echo "Deployment timeout reached!"
-            echo "DEPLOY_STATUS=timeout" >> $GITHUB_ENV
-          fi
+          
+          echo "Deployment timeout reached!"
+          echo "DEPLOY_STATUS=timeout" >> $GITHUB_ENV
+          exit 0
 
       - name: Update GitHub Commit Status
         run: |
