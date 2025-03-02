@@ -6,7 +6,8 @@
                     <img v-if="meckbaigBirthdayChecker" id="mainIcon" type="image/svg" src="/src/assets/syts-icon-birthday-themed.svg" class="my-1" style="height: 42px;" />
                     <img v-else-if="newYearChecker" id="mainIcon" type="image/svg" src="/src/assets/syts-icon-new-year-themed.svg" class="my-1" style="height: 42px;" />
                     <img v-else type="image/svg" id="mainIcon" src="/src/assets/syts-icon.svg" class="my-1" style="height: 42px;" />
-                    <div class="d-flex d-sm-none align-self-center">SYTS</div>
+                    <div v-if="meckbaigBirthdayChecker" class="d-flex d-sm-none align-self-center">HBD!</div>
+                    <div v-else class="d-flex d-sm-none align-self-center">SYTS</div>
                     <div v-if="meckbaigBirthdayChecker" class="d-none d-sm-flex align-self-center">🥳 Happy Birthday Meckbaig! 🥳</div>
                     <div v-else class="d-none d-sm-flex align-self-center">SmartYtSubscriptions</div>
                 </router-link>
