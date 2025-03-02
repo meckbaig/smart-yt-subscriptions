@@ -83,14 +83,9 @@ async function getSubscriptions() {
 }
 
 onMounted(async () => {
-    let theme = cookies.get('theme')
-    if (theme != undefined) {
-        store.commit('setTheme', theme);
-    }
-    let snowEnabled = cookies.get('snowEnabled')
-    if (snowEnabled !== null) {
-        store.commit('setSnowEnabled', snowEnabled === 'true')
-    }
+    loadTheme();
+    loadSnow();
+    loadBirthDay();
     document.documentElement.setAttribute("data-bs-theme", store.state.theme);
     await loadUser();
 })
@@ -99,6 +94,27 @@ async function loadUser() {
     let user = localStorage.getItem('user')
     if (user != null) {
         store.commit('setUser', JSON.parse(user))
+    }
+}
+
+function loadTheme() {
+    let theme = cookies.get('theme')
+    if (theme != undefined) {
+        store.commit('setTheme', theme);
+    }
+}
+
+function loadSnow() {
+    let snowEnabled = cookies.get('snowEnabled')
+    if (snowEnabled !== null) {
+        store.commit('setSnowEnabled', snowEnabled === 'true')
+    }
+}
+
+function loadBirthDay() {
+    let meckbaigBirthdayEnabled = cookies.get('meckbaigBirthdayEnabled')
+    if (meckbaigBirthdayEnabled !== null) {
+        store.commit('setMeckbaigBirthdayEnabled', meckbaigBirthdayEnabled === 'true')
     }
 }
 
