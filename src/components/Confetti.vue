@@ -87,6 +87,7 @@
     width: 100vw;
     height: 100vh;
     overflow: hidden;
+    pointer-events: none;
   }
   canvas {
     display: block;
