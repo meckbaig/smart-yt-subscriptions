@@ -9,7 +9,7 @@ export const axiosClientV1 = axios.create({
 });
 
 function mainDomain() {
-    return process.env.NODE_ENV === 'production' 
-        ? "https://smart-youtube-subscriptions-backend.ru" 
-        : "https://localhost:7150";
+  return process.env.NODE_ENV === 'production' 
+    ? import.meta.env.VITE_PRODUCTION_DOMAIN
+    : "https://localhost:7150";
 }
