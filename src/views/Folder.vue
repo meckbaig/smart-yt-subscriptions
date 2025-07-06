@@ -8,7 +8,7 @@
             <h2 v-bind:style="contrastColor(folder.color)" class="mt-1">{{ folder.name }}</h2>
             <h5 v-if="lastCallIsValid()" v-bind:style="contrastColor(folder.color)"
                 class="ms-auto mt-1 text-end d-none d-md-flex" v-bind:title="lastCallString">
-                Последнее обновление: {{ dateParser.formatToRelative(lastCallString) }}
+                Последнее обновление: {{ dateParser.formatToRelative(lastCall) }}
             </h5>
             <button @click="refreshFolderVideos()" class="btn btn-light mx-0 py-1 ms-auto ms-md-0"
                 v-bind:disabled="refreshButtonLocked">

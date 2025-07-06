@@ -44,7 +44,7 @@
                             <p class="m-0 p-0 mx-1">•</p>
                             <a class="text-decoration-none text-nowrap text-reset p-0 m-0 fw-normal lh-1"
                                 style="font-size: 14px;" v-bind:title="dateString">
-                                {{ dateParser.formatToRelative(dateString) }}</a>
+                                {{ dateParser.formatToRelative(props.publishedAt) }}</a>
                         </template>
                     </div>
                 </li>

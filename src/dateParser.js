@@ -1,10 +1,17 @@
 import { getWording } from "./wordings"
 
-export function formatToRelative(dateString) {
-    if (dateString == null ) {
+export function formatToRelative(dateInput) {
+    if (dateInput == null) {
         return "Никогда";
     }
-    let date = isDate(dateString) ? dateString : parseDate(dateString);
+    
+    let date = isDate(dateInput) ? dateInput : new Date(dateInput);
+    
+    if (isNaN(date.getTime())) {
+        console.log(date);
+        return "Неизвестная дата";
+    }
+    
     let currentDate = Date.now();
     let diffenence = currentDate - date;
     if (wasYesterday(date)) {
@@ -15,19 +22,6 @@ export function formatToRelative(dateString) {
 
 function isDate(variable) {
     return variable instanceof Date;
-}
-
-function parseDate(str) {
-    var parts = str.replace(',', '').split(' ');
-    var timeParts = parts[0].split(':');
-    var dateParts = parts[1].split('.');
-    return new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], timeParts[2]);
-}
-
-function diffenenceDayAndGreater(diffenence) {
-    let sd = Math.floor(diffenence / (1000 * 3600 * 24));
-    console.log(sd);
-    return sd > 0;
 }
 
 function wasYesterday(date) {
